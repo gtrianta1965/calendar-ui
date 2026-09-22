@@ -87,8 +87,10 @@ const apiMe = () => apiRequest("/auth/me");
 // Everyone's id, username, full_name, color and is_active (nothing private). Open to any signed-in user.
 const apiUsers = () => apiRequest("/users/directory");
 
-// The customer-project choices for the entry form: active projects, the signed-in user's favorites first.
-const apiProjectOptions = () => apiRequest("/projects/options");
+// The customer-project choices for the entry form: active projects, one user's favorites first (the signed-in
+// user's by default, or forUserId's when given, so the list reflects whoever the entry is being made for).
+const apiProjectOptions = (forUserId) =>
+  apiRequest(forUserId == null ? "/projects/options" : `/projects/options?user_id=${forUserId}`);
 
 // Entries of the given users (a list of user ids). `from` and `to` are YYYY-MM-DD, both inclusive; up to 5000.
 const apiEntries = (from, to, userIds) =>

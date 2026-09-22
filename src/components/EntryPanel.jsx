@@ -1,8 +1,7 @@
-// catalog: the customer-project choices from the API, { projects, status } (see useProjects).
 // owners: the users an entry can be given to, [{ username, label, color }] (never an administrator); currentUser: the signed-in username;
-// userOf(username): an entry owner's { label, color }; isShown(username): whether that user's entries are checked.
+// userOf(username): an entry owner's { id, label, color }; isShown(username): whether that user's entries are checked.
 // onAdd, onUpdate and onRemove call the API and resolve with { ok: true } or { ok: false, error }.
-function EntryPanel({ dateKey: selectedKey, catalog, owners, currentUser, userOf, isShown, entries, onAdd, onUpdate, onRemove }) {
+function EntryPanel({ dateKey: selectedKey, owners, currentUser, userOf, isShown, entries, onAdd, onUpdate, onRemove }) {
   // Select values are strings. project "" means nothing chosen yet; hours starts at the default.
   const [project, setProject] = React.useState("");
   const [hours, setHours] = React.useState(String(DEFAULT_HOURS));
@@ -14,6 +13,13 @@ function EntryPanel({ dateKey: selectedKey, catalog, owners, currentUser, userOf
   const [busy, setBusy] = React.useState(false);            // an API call is in progress
   const [failure, setFailure] = React.useState("");         // why the last add / change / delete failed
   const [hiddenNote, setHiddenNote] = React.useState("");   // saved, but for a user whose entries are not shown
+
+  // The customer-project choices, favorites-first for the CHOSEN owner (not necessarily the signed-in user): so
+  // when the User dropdown changes, the list below reorders to that person's favorites. Reloads whenever the
+  // owner changes; while nobody is chosen yet (an administrator, before they pick someone) it falls back to the
+  // API's own default, the signed-in user.
+  const ownerId = owner ? (userOf(owner) || {}).id : undefined;
+  const catalog = useProjects(ownerId);
 
   const resetEditor = () => {
     setProject(""); setHours(String(DEFAULT_HOURS)); setOwner(defaultOwner); setEditingId(null); setFailure(""); setHiddenNote("");

@@ -157,7 +157,6 @@ function CalendarApp({ user, profile, users, onLogout }) {
       />
       <EntryPanel
         dateKey={selected}
-        catalog={catalog}
         owners={owners}
         currentUser={user}
         userOf={userOf}
