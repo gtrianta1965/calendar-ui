@@ -1,0 +1,1370 @@
+<!doctype html>
+<html lang="en">
+<!-- GENERATED FILE: index.html with every local script and the stylesheet put inside it, in the same order.
+     Do not edit it: change the files under src/ and css/ and generate it again. -->
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simple Calendar</title>
+  <style>
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --border: #dfe1e6;
+  --text: #172b4d;
+  --muted: #6b778c;
+  --accent: #0052cc;
+  --accent-soft: #e6effc;
+  --today: #fff4d6;
+  --danger: #c9372c;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+.app { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+/* Buttons */
+button {
+  font: inherit; cursor: pointer; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--text); padding: 6px 12px;
+}
+button:hover { background: var(--accent-soft); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.primary:hover { background: #0747a6; }
+button.danger { color: var(--danger); }
+
+/* Header */
+.header { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.header h1 { flex: 1 1 auto; margin: 0; font-size: 1.5rem; }
+.header .user { color: var(--muted); font-size: .9rem; }
+.user-dot { display: inline-block; width: .7em; height: .7em; border-radius: 50%; margin: 0 .35em 0 .2em; }
+
+/* Who is in the system: everyone from the API's user directory, in their color */
+.user-list { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0 0 12px; padding: 0; list-style: none; color: var(--muted); font-size: .85rem; }
+.user-list li { display: flex; align-items: center; }
+.user-list label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.user-list input { margin: 0 2px 0 0; cursor: pointer; }
+.user-list .user-dot { margin-left: 0; }
+.user-list .inactive { font-weight: 400; font-style: italic; }
+.user-list .me { color: var(--text); font-weight: 600; }
+
+/* Calendar grid */
+.grid {
+  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--border); gap: 1px; overflow: hidden;
+}
+.dow {
+  background: #ebecf0; padding: 8px; text-align: center;
+  font-size: .8rem; font-weight: 600; color: var(--muted);
+}
+.cell {
+  background: var(--surface); min-height: 110px; padding: 6px;
+  cursor: pointer; display: flex; flex-direction: column; gap: 4px;
+  overflow: hidden;
+}
+.cell:hover { background: var(--accent-soft); }
+/* Days of the previous/next month: dimmed, but still clickable and editable. */
+.cell.outside { background: #f7f8fa; }
+.cell.outside:hover { background: var(--accent-soft); }
+.cell.outside:not(.today) .num { color: var(--muted); font-weight: 500; }
+.cell.today { background: var(--today); }
+.cell.selected { outline: 2px solid var(--accent); outline-offset: -2px; }
+.num { font-size: .85rem; font-weight: 600; }
+.today .num {
+  background: var(--accent); color: #fff; border-radius: 50%;
+  width: 24px; height: 24px; display: inline-flex;
+  align-items: center; justify-content: center;
+}
+/* An entry is drawn in its owner's color: --user-color is set on it from the user directory (accent blue when unknown).
+   The text stays dark and only the tint and the left bar carry the color, so any user color, even a light one, stays readable. */
+.entry {
+  font-size: .75rem; background: var(--accent-soft); color: var(--text);
+  border-left: 3px solid var(--accent); border-radius: 3px;
+  padding: 2px 5px; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis;
+}
+.entry {
+  background: color-mix(in srgb, var(--user-color, var(--accent)) 16%, #fff);
+  border-left-color: var(--user-color, var(--accent));
+}
+
+/* Entry panel */
+.panel {
+  margin-top: 16px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 8px; padding: 16px;
+}
+.panel h2 { margin: 0 0 12px; font-size: 1.1rem; }
+.panel ul { list-style: none; margin: 0 0 12px; padding: 0; }
+.panel li {
+  display: flex; gap: 8px; align-items: center; padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+.panel li .text { flex: 1; word-break: break-word; }
+.panel li .owner { color: var(--muted); font-size: .85rem; white-space: nowrap; }
+.panel li .owner .user-dot { margin-left: 0; }
+.panel .hours { font-weight: 600; font-variant-numeric: tabular-nums; }
+.panel select {
+  font: inherit; padding: 6px 10px; background: var(--surface); color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px; min-width: 0;
+}
+.owner-select { flex: 0 1 170px; }
+.project-select { flex: 1 1 220px; }
+.hours-select { flex: 0 0 110px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+.muted { color: var(--muted); font-size: .9rem; }
+
+@media (max-width: 640px) {
+  .cell { min-height: 70px; }
+  .entry { font-size: .65rem; }
+}
+
+button:disabled { opacity: .5; cursor: not-allowed; }
+button:disabled:not(.primary) { background: var(--surface); }
+button.primary:disabled { background: var(--accent); }
+
+/* Confirm dialog */
+.overlay {
+  position: fixed; inset: 0; background: rgba(9, 30, 66, .54);
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+  z-index: 100;
+}
+.dialog {
+  background: var(--surface); border-radius: 8px; padding: 24px;
+  width: 100%; max-width: 420px; box-shadow: 0 8px 32px rgba(9, 30, 66, .35);
+}
+.dialog h2 { margin: 0 0 8px; font-size: 1.2rem; }
+.dialog p { margin: 0 0 20px; color: var(--muted); line-height: 1.4; }
+.dialog .actions { display: flex; justify-content: flex-end; gap: 8px; }
+button.danger-solid { background: var(--danger); border-color: var(--danger); color: #fff; }
+button.danger-solid:hover { background: #a32a21; }
+
+/* Login / create account page */
+.auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.auth-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 28px; width: 100%; max-width: 380px;
+  display: flex; flex-direction: column; gap: 14px;
+  box-shadow: 0 4px 16px rgba(9, 30, 66, .12);
+}
+.auth-card h1 { margin: 0 0 4px; font-size: 1.4rem; }
+.field { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; font-weight: 600; color: var(--muted); }
+.field input {
+  font: inherit; font-weight: 400; color: var(--text); padding: 8px 10px;
+  border: 1px solid var(--border); border-radius: 6px; min-width: 0;
+}
+.auth-error { margin: 0; color: var(--danger); font-size: .9rem; }
+.auth-note { color: var(--muted); }
+.banner { margin: 0 0 12px; }
+.banner button { margin-left: 6px; }
+.import-banner { color: var(--text); background: var(--accent-soft); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-size: .9rem; }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Libraries -->
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.4/babel.min.js"></script>
+
+  <!-- Config, utilities and state (plain JS). Files share globals, so order matters. -->
+  <script>
+/* src/config.js */
+// Settings you are expected to edit: where the API is, and the choices offered
+// when adding an entry. Plain script, exposes globals.
+
+// Where the API listens. Sign-in and the list of users come from it. No trailing slash.
+// The API is Oracle REST Data Services (ORDS), the PL/SQL services of ords/ords.sql. It is now the one on the Oracle
+// Autonomous Database (see "The same backend on Oracle Autonomous Database" in ords/ords.md); it answers a page from any origin.
+const API_BASE_URL = "https://sbef1gj6zmj6uhq-dbg30.adb.eu-frankfurt-1.oraclecloudapps.com/ords/gtrianta/calendar";
+// The same services on the local Oracle database (start ORDS as described in ords/ords.md); to use it instead,
+// comment the line above and uncomment this one (ORDS accepts pages served from any localhost port):
+// const API_BASE_URL = "http://localhost:8080/ords/gtrianta/calendar";
+// The FastAPI backend (startserver.bat, SQLite) answers exactly the same requests; to use it instead,
+// comment the line above and uncomment this one (see backend/README.md for its CORS settings):
+// const API_BASE_URL = "http://127.0.0.1:8000/api";
+
+// NOT USED BY THE APP ANY MORE: it signs in, and lists users, through the API. These are only the usernames
+// db/create_db.py creates in a NEW database. There are no passwords here (this file is served to the browser as
+// plain text): create_db.py takes the starting password of these accounts from its --password option, from the
+// CALENDAR_SEED_PASSWORD environment variable, or asks for it, and hashes it before it is stored.
+const USERS = [
+  { username: "alice" },
+  { username: "bob" },
+  { username: "gtrianta" }
+];
+
+// NOT USED BY THE APP ANY MORE: the customer-project choices come from the API (GET /projects/options). This list is
+// only the starting data that db/create_db.py loads into a NEW database; "Customer - Project" is split on the first " - ".
+const PROJECTS = [
+  "Acme Corp - Website Redesign",
+  "Acme Corp - Mobile App",
+  "Globex - Data Migration",
+  "Globex - Support",
+  "Initech - Internal Tools",
+  "Internal - Administration",
+  "OPAP - ExaCC Migrations"
+];
+
+// Hours per entry: 0.5 to 12 in half-hour steps.
+const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => (i + 1) / 2);
+
+// Hours preselected when adding a new entry.
+const DEFAULT_HOURS = 8;
+</script>
+  <script>
+/* src/utils/dates.js */
+// Date helpers and calendar constants (plain script, exposes globals).
+
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]; // the week starts on Monday
+const MONTHS = ["January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"];
+
+const pad2 = (n) => String(n).padStart(2, "0");
+
+// month is 0-based, like Date. Returns "YYYY-MM-DD".
+const dateKey = (year, month, day) => `${year}-${pad2(month + 1)}-${pad2(day)}`;
+
+const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
+
+// 0 (Monday) - 6 (Sunday). Date.getDay() is 0 (Sunday) - 6 (Saturday), so shift it by one.
+const firstWeekday = (year, month) => (new Date(year, month, 1).getDay() + 6) % 7;
+
+// Every cell of the month view: leading days from the previous month and trailing
+// days from the next one fill out the first and last weeks (always whole weeks).
+// Returns [{ key, day, month, outside }], where `month` is 0-based and `outside`
+// is true for days that belong to the previous or next month.
+function monthGrid(year, month) {
+  const lead = firstWeekday(year, month);
+  const total = Math.ceil((lead + daysInMonth(year, month)) / 7) * 7;
+  return Array.from({ length: total }, (_, i) => {
+    const d = new Date(year, month, 1 - lead + i); // Date rolls over month/year boundaries
+    return {
+      key: dateKey(d.getFullYear(), d.getMonth(), d.getDate()),
+      day: d.getDate(),
+      month: d.getMonth(),
+      outside: d.getMonth() !== month,
+    };
+  });
+}
+</script>
+  <script>
+/* src/utils/format.js */
+// Display helpers for entries (plain script, exposes globals).
+
+const formatHours = (hours) => `${hours}h`;
+
+// A date key ("YYYY-MM-DD", what dates are stored and sent as) as shown to people: "DD-MM-YYYY".
+const formatDate = (key) => key.split("-").reverse().join("-");
+
+// "2.5h · Acme Corp - Website Redesign". Hours come first so they stay visible
+// when a long project name is cut off with an ellipsis in a day cell.
+const formatEntry = (entry) => `${formatHours(entry.hours)} · ${entry.project}`;
+</script>
+  <script>
+/* src/utils/storage.js */
+// The entries saved in this browser (plain script, exposes globals).
+//
+// Entries now live in the API. What is left here is what was saved before that: it is only read so it can be
+// imported into the API once (see importLocal.js), and removed as it is imported.
+// Stored shape: { "YYYY-MM-DD": [{ id, user, project, hours }, ...] }
+// One store holds every user's entries; each entry carries the `user` who owns it.
+//
+// Key history: -v1 held free-text comments (ignored, left untouched); -v2 held
+// entries without a user (adopted by the first configured user, see adoptLegacyEntries).
+
+const ENTRIES_STORAGE_KEY = "calendar-entries-v3";
+const LEGACY_ENTRIES_STORAGE_KEY = "calendar-entries-v2";
+
+function loadEntries() {
+  try {
+    const data = JSON.parse(localStorage.getItem(ENTRIES_STORAGE_KEY) || "{}");
+    return data && typeof data === "object" ? data : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+// An empty object removes the key, so clearing all entries leaves no trace.
+function saveEntries(entries) {
+  try {
+    if (Object.keys(entries).length === 0) {
+      localStorage.removeItem(ENTRIES_STORAGE_KEY);
+    } else {
+      localStorage.setItem(ENTRIES_STORAGE_KEY, JSON.stringify(entries));
+    }
+  } catch (e) {
+    // Storage unavailable or full: keep working in memory.
+  }
+}
+
+// One-time migration: entries saved before accounts existed (-v2, no user) are
+// moved into the current store and assigned to `user`. The old key is removed
+// only after the new data was written, so a failure loses nothing.
+function adoptLegacyEntries(user) {
+  try {
+    const legacy = JSON.parse(localStorage.getItem(LEGACY_ENTRIES_STORAGE_KEY) || "null");
+    if (!legacy || typeof legacy !== "object") return;
+
+    const all = loadEntries();
+    for (const [date, list] of Object.entries(legacy)) {
+      if (!Array.isArray(list) || list.length === 0) continue;
+      const adopted = list.map((e) => ({ id: e.id, user, project: e.project, hours: e.hours }));
+      all[date] = [...(all[date] || []), ...adopted];
+    }
+    localStorage.setItem(ENTRIES_STORAGE_KEY, JSON.stringify(all));
+    localStorage.removeItem(LEGACY_ENTRIES_STORAGE_KEY);
+  } catch (e) {
+    // Leave the legacy data where it is.
+  }
+}
+</script>
+  <script>
+/* src/utils/view.js */
+// Remembers which month and date are on screen (plain script, exposes globals).
+//
+// It is kept in sessionStorage, so a page reload (or anything that reloads the page, such as a live-reload server
+// noticing that the database file changed) comes back to the same month, selected date and checked users instead of
+// starting over.
+// It ends with the tab, and is cleared when someone logs in or out.
+
+const VIEW_STORAGE_KEY = "calendar-view-v1";
+
+// { year, month (0-based), selected ("YYYY-MM-DD" or null), shown (user ids, or null) }, or null when nothing valid is saved.
+function loadView() {
+  try {
+    const v = JSON.parse(sessionStorage.getItem(VIEW_STORAGE_KEY) || "null");
+    if (!v || !Number.isInteger(v.year) || !Number.isInteger(v.month) || v.month < 0 || v.month > 11) return null;
+    const selected = typeof v.selected === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v.selected) ? v.selected : null;
+    const shown = Array.isArray(v.shown) ? v.shown.filter(Number.isInteger) : null;
+    return { year: v.year, month: v.month, selected, shown };
+  } catch (e) {
+    return null;
+  }
+}
+
+function saveView(view) {
+  try { sessionStorage.setItem(VIEW_STORAGE_KEY, JSON.stringify(view)); } catch (e) {}
+}
+
+function clearView() {
+  try { sessionStorage.removeItem(VIEW_STORAGE_KEY); } catch (e) {}
+}
+</script>
+  <script>
+/* src/utils/api.js */
+// Talking to the API (plain script, exposes globals).
+//
+// Every call goes to API_BASE_URL (src/config.js). Once signed in, the bearer token that the API handed
+// out is sent on each call. The token is kept in sessionStorage, so it is forgotten when the tab closes.
+// Passwords are sent once, to log in, and never stored.
+
+const TOKEN_STORAGE_KEY = "calendar-token-v1"; // sessionStorage
+
+class ApiError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.status = status; // the HTTP status, or 0 when the API could not be reached at all
+  }
+}
+
+function getToken() {
+  try { return sessionStorage.getItem(TOKEN_STORAGE_KEY); } catch (e) { return null; }
+}
+
+function setToken(token) {
+  try { sessionStorage.setItem(TOKEN_STORAGE_KEY, token); } catch (e) {}
+}
+
+function clearToken() {
+  try { sessionStorage.removeItem(TOKEN_STORAGE_KEY); } catch (e) {}
+}
+
+// Called (once) when the API says the token is no longer good, so the app can go back to the login page.
+let unauthorizedHandler = null;
+function setUnauthorizedHandler(handler) {
+  unauthorizedHandler = handler;
+}
+
+// The API's own reason, in words: `detail` is a string, or (for invalid input) a list of field errors.
+function describeError(status, detail, response) {
+  if (typeof detail === "string") {
+    if (status === 429) {
+      const wait = response.headers.get("Retry-After");
+      return wait ? `${detail} Try again in ${wait} seconds.` : detail;
+    }
+    return detail;
+  }
+  if (Array.isArray(detail) && detail.length) {
+    return detail.map((d) => `${(d.loc || []).slice(1).join(".") || "input"}: ${d.msg}`).join("; ");
+  }
+  return status >= 500 ? "The API had an error. Try again." : `The API answered ${status}.`;
+}
+
+// Resolves with the parsed JSON (null for "204 No Content") or rejects with an ApiError.
+// `auth: false` is for calls that must not carry a token (login).
+async function apiRequest(path, { method = "GET", body, auth = true, notifyExpired = true, token = getToken() } = {}) {
+  const headers = {};
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+  if (auth && token) headers["Authorization"] = "Bearer " + token;
+
+  let response;
+  try {
+    response = await fetch(API_BASE_URL + path, {
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+  } catch (e) {
+    throw new ApiError(`Cannot reach the API at ${API_BASE_URL}. Is it running?`, 0);
+  }
+
+  if (response.ok) return response.status === 204 ? null : response.json();
+
+  let detail;
+  try { detail = (await response.json()).detail; } catch (e) {}
+  if (response.status === 401 && auth && token) {
+    clearToken();
+    if (notifyExpired && unauthorizedHandler) unauthorizedHandler();
+  }
+  throw new ApiError(describeError(response.status, detail, response), response.status);
+}
+
+// Signs in and remembers the token. Resolves with the signed-in user: { id, username, full_name, role, color, ... }.
+async function apiLogin(username, password) {
+  const result = await apiRequest("/auth/login", { method: "POST", body: { username, password }, auth: false });
+  setToken(result.access_token);
+  return result.user;
+}
+
+const apiMe = () => apiRequest("/auth/me");
+
+// Everyone's id, username, full_name, color and is_active (nothing private). Open to any signed-in user.
+const apiUsers = () => apiRequest("/users/directory");
+
+// The customer-project choices for the entry form: active projects, the signed-in user's favorites first.
+const apiProjectOptions = () => apiRequest("/projects/options");
+
+// Entries of the given users (a list of user ids). `from` and `to` are YYYY-MM-DD, both inclusive; up to 5000.
+const apiEntries = (from, to, userIds) =>
+  apiRequest(`/entries?date_from=${from}&date_to=${to}&${userIds.map((id) => `user_id=${id}`).join("&")}&limit=5000`);
+const apiCreateEntry = (body) => apiRequest("/entries", { method: "POST", body });
+// `changes` holds only the fields that change: project_id, hours, user_id, ...
+const apiUpdateEntry = (id, changes) => apiRequest(`/entries/${id}`, { method: "PATCH", body: changes });
+const apiDeleteEntry = (id) => apiRequest(`/entries/${id}`, { method: "DELETE" });
+// Deletes ALL of the signed-in user's own entries (never anyone else's).
+const apiClearMyEntries = () => apiRequest("/entries?confirm=true", { method: "DELETE" });
+// 1 to 500 entries at once, all or none.
+const apiCreateEntries = (entries) => apiRequest("/entries/bulk", { method: "POST", body: { entries } });
+
+// Forgets the token at once, then ends the session on the server too.
+async function apiLogout() {
+  const token = getToken();
+  clearToken();
+  if (!token) return;
+  try {
+    await apiRequest("/auth/logout", { method: "POST", token, notifyExpired: false });
+  } catch (e) {
+    // Already expired, or the API is down: either way there is nothing left to end.
+  }
+}
+</script>
+  <script>
+/* src/utils/auth.js */
+// Sign-in and session, against the API (plain script, exposes globals).
+//
+// The API checks the password and hands back a bearer token (see api.js). The users come from the API too:
+// nothing about accounts is stored in this project's files or in the browser except that token.
+
+// Returns { ok: true, user } or { ok: false, error } with the API's own reason (wrong password, too many
+// attempts, API not running, ...).
+async function loginUser(username, password) {
+  try {
+    return { ok: true, user: await apiLogin(String(username).trim(), password) };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+}
+
+// The signed-in user for the token saved in this tab, or null when there is none.
+// Rejects (with an ApiError) when the API cannot say: not running, or the token is no longer valid.
+async function restoreSession() {
+  return getToken() ? apiMe() : null;
+}
+
+// Everyone in the user directory, or [] if it cannot be read: the list is a nicety, and signing in must
+// not depend on it.
+async function loadUsers() {
+  try {
+    return await apiUsers();
+  } catch (e) {
+    return [];
+  }
+}
+
+const logoutUser = apiLogout;
+</script>
+  <script>
+/* src/utils/importLocal.js */
+// One-time move of the entries saved in this browser into the API (plain script, exposes globals).
+// Entries used to live only in localStorage (storage.js); this is how they get into the API.
+
+const IMPORT_CHUNK = 500; // the API takes at most 500 entries in one bulk request
+
+const countLocalEntries = () =>
+  Object.values(loadEntries()).reduce((n, list) => n + (Array.isArray(list) ? list.length : 0), 0);
+
+// What can be imported right now: { ready: [{ id, payload }], skipped }. An entry needs a project the API still
+// offers and an active user; the others are `skipped` and stay in this browser.
+// projectIdOf(label) and activeUserIdOf(username) give the API's ids, or undefined.
+function planLocalImport({ projectIdOf, activeUserIdOf }) {
+  const ready = [];
+  let skipped = 0;
+  for (const [date, list] of Object.entries(loadEntries())) {
+    if (!Array.isArray(list)) continue;
+    for (const e of list) {
+      const project_id = projectIdOf(e.project);
+      const user_id = activeUserIdOf(e.user);
+      if (project_id === undefined || user_id === undefined) {
+        skipped += 1;
+      } else {
+        ready.push({ id: e.id, payload: { user_id, project_id, entry_date: date, hours: Number(e.hours) } });
+      }
+    }
+  }
+  return { ready, skipped };
+}
+
+// Sends the ready entries, each chunk all or none, and removes a chunk from this browser as soon as the API has
+// accepted it, so a failure part-way never leads to duplicates. Resolves with how many were imported; rejects
+// with the API's error (what was imported before it stays imported).
+async function importLocalEntries(plan) {
+  let imported = 0;
+  for (let i = 0; i < plan.ready.length; i += IMPORT_CHUNK) {
+    const chunk = plan.ready.slice(i, i + IMPORT_CHUNK);
+    await apiCreateEntries(chunk.map((c) => c.payload));
+    const done = new Set(chunk.map((c) => c.id));
+    const remaining = {};
+    for (const [date, list] of Object.entries(loadEntries())) {
+      const kept = list.filter((e) => !done.has(e.id));
+      if (kept.length) remaining[date] = kept;
+    }
+    saveEntries(remaining);
+    imported += chunk.length;
+  }
+  return imported;
+}
+</script>
+  <script>
+/* src/hooks/useEntries.js */
+// State hook for the calendar's entries, kept in the API (plain script, no JSX).
+//
+// It loads the entries of the chosen users (`userIds`) for the dates on screen (`from` to `to`, the first and last
+// cell of the month grid), and loads again when any of those change. It turns changes into API calls. As in the API,
+// signing in only says WHO you are: every entry can be added for, edited or deleted by anyone; only "clear all" is
+// limited to your own.
+//
+// An entry, as the components see it: { id, user (username), userId, project (label), projectId, hours, date }.
+// Entries are grouped by date: { "YYYY-MM-DD": [entry, ...] }.
+//
+// `projectIdOf(label)` and `userIdOf(username)` translate what the form shows into the ids the API wants
+// (undefined when unknown). The change functions resolve with { ok: true } or { ok: false, error }, and never throw.
+
+const ENTRIES_LIMIT = 5000; // the most the API returns for one request
+
+const toUiEntry = (e) => ({
+  id: e.id,
+  user: e.username,
+  userId: e.user_id,
+  project: e.project_label,
+  projectId: e.project_id,
+  hours: e.hours,
+  date: e.entry_date,
+});
+
+// The order the API uses: by user, then by creation.
+const byOwnerThenId = (a, b) => a.userId - b.userId || a.id - b.id;
+
+function groupByDate(list) {
+  const grouped = {};
+  for (const e of list) (grouped[e.date] = grouped[e.date] || []).push(e);
+  for (const date of Object.keys(grouped)) grouped[date].sort(byOwnerThenId);
+  return grouped;
+}
+
+// `entries` without the entry `id` (wherever it is), and with `entry` added when given.
+function withEntry(entries, id, entry) {
+  const next = {};
+  for (const [date, list] of Object.entries(entries)) {
+    const kept = list.filter((e) => e.id !== id);
+    if (kept.length) next[date] = kept;
+  }
+  if (entry) next[entry.date] = [...(next[entry.date] || []), entry].sort(byOwnerThenId);
+  return next;
+}
+
+function useEntries({ from, to, userIds, projectIdOf, userIdOf }) {
+  const [state, setState] = React.useState({ entries: {}, status: "loading", error: "", truncated: false });
+  const latestRequest = React.useRef(0);
+
+  const usersKey = [...userIds].sort((a, b) => a - b).join(",");   // a value, so a new array with the same ids does not reload
+
+  const load = React.useCallback(async () => {
+    const request = ++latestRequest.current;
+    if (usersKey === "") {                                         // nobody chosen: nothing to ask for
+      setState({ entries: {}, status: "ready", error: "", truncated: false });
+      return;
+    }
+    setState((s) => ({ ...s, status: "loading", error: "" }));
+    try {
+      const list = await apiEntries(from, to, usersKey.split(","));
+      if (request !== latestRequest.current) return; // a newer request has taken over
+      setState({ entries: groupByDate(list.map(toUiEntry)), status: "ready", error: "", truncated: list.length >= ENTRIES_LIMIT });
+    } catch (e) {
+      if (request === latestRequest.current) setState((s) => ({ ...s, status: "error", error: e.message }));
+    }
+  }, [from, to, usersKey]);
+
+  React.useEffect(() => { load(); }, [load]);
+
+  // Runs an API change; the outcome is a value, so the form can show what went wrong and keep what was typed.
+  const attempt = async (change) => {
+    try {
+      await change();
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  };
+
+  const ownerId = (username) => {
+    const id = userIdOf(username);
+    if (id === undefined) throw new Error(`Unknown user "${username}".`);
+    return id;
+  };
+
+  const projectId = (label) => {
+    const id = projectIdOf(label);
+    if (id === undefined) throw new Error("That project is not available any more. Pick another one.");
+    return id;
+  };
+
+  // `user` is whose entry it is; left out, it is the signed-in user (the API's default).
+  const addEntry = (date, { project, hours, user: owner }) => attempt(async () => {
+    const body = { project_id: projectId(project), entry_date: date, hours };
+    if (owner) body.user_id = ownerId(owner);
+    const created = toUiEntry(await apiCreateEntry(body));
+    setState((s) => ({ ...s, entries: withEntry(s.entries, created.id, created) }));
+  });
+
+  // Only what changed is sent, so an entry on a since-retired project can keep it.
+  const updateEntry = (date, id, { project, hours, user: owner }) => attempt(async () => {
+    const existing = (state.entries[date] || []).find((e) => e.id === id);
+    if (!existing) throw new Error("This entry no longer exists.");
+    const changes = {};
+    if (project !== existing.project) changes.project_id = projectId(project);
+    if (Number(hours) !== existing.hours) changes.hours = Number(hours);
+    if (owner && owner !== existing.user) changes.user_id = ownerId(owner);
+    if (Object.keys(changes).length === 0) return;
+    const updated = toUiEntry(await apiUpdateEntry(id, changes));
+    setState((s) => ({ ...s, entries: withEntry(s.entries, id, updated) }));
+  });
+
+  const removeEntry = (date, id) => attempt(async () => {
+    try {
+      await apiDeleteEntry(id);
+    } catch (e) {
+      if (e.status !== 404) throw e; // already deleted by someone else: it is gone either way
+    }
+    setState((s) => ({ ...s, entries: withEntry(s.entries, id, null) }));
+  });
+
+  // Deletes ALL of the signed-in user's entries (every month), then shows what is left.
+  const clearAll = () => attempt(async () => {
+    await apiClearMyEntries();
+    await load();
+  });
+
+  return { ...state, reload: load, addEntry, updateEntry, removeEntry, clearAll };
+}
+</script>
+  <script>
+/* src/hooks/useProjects.js */
+// The "Customer - Project" choices, read from the API (plain script, no JSX).
+// Only active projects of active customers, the signed-in user's favorites first (GET /projects/options).
+// Each project is { id, label, is_favorite, ... }; entries are saved with the label.
+//
+// Returns { projects, status, error, reload }: status is "loading", "ready" or "error" (error is then the reason).
+function useProjects() {
+  const [state, setState] = React.useState({ projects: [], status: "loading", error: "" });
+
+  const load = React.useCallback(async () => {
+    setState((s) => ({ ...s, status: "loading", error: "" }));
+    try {
+      setState({ projects: await apiProjectOptions(), status: "ready", error: "" });
+    } catch (e) {
+      setState({ projects: [], status: "error", error: e.message });
+    }
+  }, []);
+
+  React.useEffect(() => { load(); }, [load]);
+
+  return { ...state, reload: load };
+}
+</script>
+
+  <!-- Components (JSX, transpiled in the browser). Leaves first, App last. -->
+  <script type="text/babel">
+/* src/components/Header.jsx */
+function Header({ year, month, profile, onPrev, onToday, onNext, onRefresh, refreshing, onClear, canClear, onLogout }) {
+  return (
+    <div className="header">
+      <h1>{MONTHS[month]} {year}</h1>
+      <span className="user">
+        Signed in as <span className="user-dot" style={{ background: profile.color }} />
+        <strong>{profile.full_name || profile.username}</strong>
+        {profile.role && <span className="role"> ({profile.role})</span>}
+      </span>
+      <button onClick={onPrev} aria-label="Previous month">&lt; Prev</button>
+      <button onClick={onToday}>Today</button>
+      <button onClick={onNext} aria-label="Next month">Next &gt;</button>
+      <button onClick={onRefresh} disabled={refreshing} title="Load the entries and projects again, to see what others changed">
+        {refreshing ? "Refreshing…" : "Refresh"}
+      </button>
+      <button className="danger" onClick={onClear} disabled={!canClear}>Clear data</button>
+      <button onClick={onLogout}>Log out</button>
+    </div>
+  );
+}
+</script>
+  <script type="text/babel">
+/* src/components/UserList.jsx */
+// Everyone in the user directory, each in their own color, with a checkbox: the calendar shows the entries of the
+// checked users only. `meId` marks the signed-in user, `shown` is the list of checked user ids and
+// `onToggle(id)` checks or unchecks one. Deactivated users are listed too (their old entries can still be read),
+// and marked.
+function UserList({ users, meId, shown, onToggle }) {
+  if (users.length === 0) return null;
+  return (
+    <ul className="user-list" aria-label="Show entries of">
+      {users.map((u) => (
+        <li key={u.id} className={u.id === meId ? "me" : undefined} title={u.username}>
+          <label>
+            <input type="checkbox" checked={shown.includes(u.id)} onChange={() => onToggle(u.id)} />
+            <span className="user-dot" style={{ background: u.color }} />
+            {u.full_name || u.username}
+            {!u.is_active && <span className="inactive"> (inactive)</span>}
+          </label>
+        </li>
+      ))}
+    </ul>
+  );
+}
+</script>
+  <script type="text/babel">
+/* src/components/ImportBanner.jsx */
+// Offers to move the entries this browser saved before entries lived in the API into the API.
+// Shown only while such entries exist. `ready` is false until the project list and the users have loaded
+// (until then nothing could be matched). `onImported` is called after an import, to show the new entries.
+function ImportBanner({ ready, projectIdOf, activeUserIdOf, onImported }) {
+  const [version, setVersion] = React.useState(0);       // bumped after an import, to read the browser's store again
+  const [busy, setBusy] = React.useState(false);
+  const [message, setMessage] = React.useState("");
+  const [hidden, setHidden] = React.useState(false);
+
+  const total = React.useMemo(countLocalEntries, [version]);
+  const plan = React.useMemo(
+    () => (ready ? planLocalImport({ projectIdOf, activeUserIdOf }) : { ready: [], skipped: 0 }),
+    [version, ready, projectIdOf, activeUserIdOf]);
+
+  if (hidden || (total === 0 && !message)) return null;
+
+  const run = async () => {
+    setBusy(true);
+    setMessage("");
+    let text;
+    try {
+      const n = await importLocalEntries(plan);
+      text = `Imported ${n} ${n === 1 ? "entry" : "entries"} into the API.`;
+    } catch (e) {
+      text = `The import stopped: ${e.message} Entries already imported are kept in the API; the rest are still saved in this browser.`;
+    }
+    setBusy(false);
+    setMessage(text);
+    setVersion((v) => v + 1);
+    onImported();
+  };
+
+  return (
+    <p className="banner import-banner" role="status">
+      {total > 0 && (
+        <span>
+          {total} {total === 1 ? "entry" : "entries"} saved in this browser from before entries moved to the API {total === 1 ? "is" : "are"} not
+          in the API yet.{" "}
+          {plan.skipped > 0 && `${plan.skipped} cannot be imported (their project is retired, or their user is inactive or unknown) and would stay here. `}
+        </span>
+      )}
+      {message && <span>{message} </span>}
+      {total > 0 && (!ready || plan.ready.length > 0) && (
+        <button onClick={run} disabled={!ready || busy}>
+          {busy ? "Importing…" : ready ? `Import ${plan.ready.length}` : "Import"}
+        </button>
+      )}
+      <button onClick={() => setHidden(true)}>Hide</button>
+    </p>
+  );
+}
+</script>
+  <script type="text/babel">
+/* src/components/DayCell.jsx */
+// monthLabel (e.g. "Aug") is only passed for days outside the displayed month.
+// userOf(username) is the entry owner's { label, color }, or undefined when the owner is not known.
+function DayCell({ day, monthLabel, entries, userOf, isOutside, isToday, isSelected, onSelect }) {
+  const cls = ["cell", isOutside && "outside", isToday && "today", isSelected && "selected"]
+    .filter(Boolean).join(" ");
+
+  return (
+    <div className={cls} onClick={onSelect}>
+      <span className="num">{monthLabel ? `${monthLabel} ${day}` : day}</span>
+      {entries.map((e) => {
+        const owner = userOf(e.user);
+        return (
+          <div key={e.id} className="entry" style={{ "--user-color": owner && owner.color }}
+               title={`${formatEntry(e)} (${owner ? owner.label : e.user})`}>
+            {formatEntry(e)}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+</script>
+  <script type="text/babel">
+/* src/components/CalendarGrid.jsx */
+function CalendarGrid({ year, month, entries, userOf, selected, todayKey, onSelect }) {
+  return (
+    <div className="grid">
+      {DAYS.map((d) => <div key={d} className="dow">{d}</div>)}
+      {monthGrid(year, month).map((cell) => (
+        <DayCell
+          key={cell.key}
+          day={cell.day}
+          monthLabel={cell.outside ? MONTHS[cell.month].slice(0, 3) : null}
+          entries={entries[cell.key] || []}
+          userOf={userOf}
+          isOutside={cell.outside}
+          isToday={cell.key === todayKey}
+          isSelected={cell.key === selected}
+          onSelect={() => onSelect(cell.key)}
+        />
+      ))}
+    </div>
+  );
+}
+</script>
+  <script type="text/babel">
+/* src/components/EntryPanel.jsx */
+// catalog: the customer-project choices from the API, { projects, status } (see useProjects).
+// owners: the users an entry can be given to, [{ username, label, color }] (never an administrator); currentUser: the signed-in username;
+// userOf(username): an entry owner's { label, color }; isShown(username): whether that user's entries are checked.
+// onAdd, onUpdate and onRemove call the API and resolve with { ok: true } or { ok: false, error }.
+function EntryPanel({ dateKey: selectedKey, catalog, owners, currentUser, userOf, isShown, entries, onAdd, onUpdate, onRemove }) {
+  // Select values are strings. project "" means nothing chosen yet; hours starts at the default.
+  const [project, setProject] = React.useState("");
+  const [hours, setHours] = React.useState(String(DEFAULT_HOURS));
+  // Whose entry: the signed-in user when adding, the entry's own when editing. An administrator is not among the owners
+  // (they do not keep entries for themselves), so they must choose one: "" means nobody chosen yet.
+  const defaultOwner = owners.some((o) => o.username === currentUser) ? currentUser : "";
+  const [owner, setOwner] = React.useState(defaultOwner);
+  const [editingId, setEditingId] = React.useState(null);
+  const [busy, setBusy] = React.useState(false);            // an API call is in progress
+  const [failure, setFailure] = React.useState("");         // why the last add / change / delete failed
+  const [hiddenNote, setHiddenNote] = React.useState("");   // saved, but for a user whose entries are not shown
+
+  const resetEditor = () => {
+    setProject(""); setHours(String(DEFAULT_HOURS)); setOwner(defaultOwner); setEditingId(null); setFailure(""); setHiddenNote("");
+  };
+
+  // Start with a clean editor whenever a different date is selected.
+  React.useEffect(resetEditor, [selectedKey]);
+
+  if (!selectedKey) {
+    return (
+      <div className="panel">
+        <p className="muted">Click a date to add or edit its entries.</p>
+      </div>
+    );
+  }
+
+  const canSave = project !== "" && owner !== "";
+
+  // On success the form starts over; on failure it keeps what was typed and says what went wrong.
+  const save = async () => {
+    if (!canSave || busy) return;
+    setBusy(true);
+    setFailure("");
+    const fields = { project, hours: Number(hours), user: owner };
+    const result = editingId ? await onUpdate(selectedKey, editingId, fields) : await onAdd(selectedKey, fields);
+    setBusy(false);
+    if (!result.ok) {
+      setFailure(result.error);
+      return;
+    }
+    resetEditor();
+    // An entry for a user whose box is unchecked is saved but not shown: say so instead of letting it seem lost.
+    if (!isShown(owner)) {
+      setHiddenNote(`Saved for ${(userOf(owner) || {}).label || owner}, whose entries are not shown. Tick their box to see them.`);
+    }
+  };
+
+  const remove = async (id) => {
+    if (busy) return;
+    setBusy(true);
+    setFailure("");
+    const result = await onRemove(selectedKey, id);
+    setBusy(false);
+    if (!result.ok) setFailure(result.error);
+    else if (editingId === id) resetEditor();
+  };
+
+  const startEdit = (e) => {
+    setEditingId(e.id);
+    setOwner(e.user);
+    setProject(e.project);
+    setHours(String(e.hours));
+  };
+
+  // Favorites come first from the API; when there are any, they get a group of their own.
+  const favorites = catalog.projects.filter((p) => p.is_favorite);
+  const others = catalog.projects.filter((p) => !p.is_favorite);
+  // If a stored value is no longer offered (a retired project, or the list did not load), keep it selectable while editing.
+  const stray = project && !catalog.projects.some((p) => p.label === project) ? project : null;
+  // An entry's owner who is not offered (deactivated, or unknown) stays selectable while editing.
+  const strayOwner = owner && !owners.some((o) => o.username === owner) ? owner : null;
+  const option = (p) => <option key={p.id} value={p.label}>{p.label}</option>;
+  const placeholder = catalog.status === "loading" ? "Loading projects…"
+    : catalog.status === "error" ? "Projects unavailable" : "Customer - Project…";
+  const hourOptions = HOUR_OPTIONS.includes(Number(hours))
+    ? HOUR_OPTIONS : [...HOUR_OPTIONS, Number(hours)];
+
+  return (
+    <div className="panel">
+      <h2>Entries for {formatDate(selectedKey)}</h2>
+      {entries.length === 0 && <p className="muted">No entries yet.</p>}
+      <ul>
+        {entries.map((e) => (
+          <li key={e.id}>
+            <span className="text">{e.project}</span>
+            <span className="owner" title="Whose entry">
+              <span className="user-dot" style={{ background: (userOf(e.user) || {}).color }} />
+              {(userOf(e.user) || {}).label || e.user}
+            </span>
+            <span className="hours">{formatHours(e.hours)}</span>
+            <button onClick={() => startEdit(e)} disabled={busy}>Edit</button>
+            <button className="danger" onClick={() => remove(e.id)} disabled={busy}>Delete</button>
+          </li>
+        ))}
+      </ul>
+      <div className="row" onKeyDown={(e) => { if (e.key === "Escape") resetEditor(); }}>
+        <select
+          className="owner-select"
+          aria-label="User"
+          value={owner}
+          onChange={(e) => setOwner(e.target.value)}
+        >
+          {owner === "" && <option value="" disabled>User…</option>}
+          {owners.map((o) => <option key={o.username} value={o.username}>{o.label}</option>)}
+          {strayOwner && <option value={strayOwner}>{strayOwner}</option>}
+        </select>
+        <select
+          className="project-select"
+          aria-label="Customer - Project"
+          value={project}
+          onChange={(e) => setProject(e.target.value)}
+        >
+          <option value="" disabled>{placeholder}</option>
+          {favorites.length > 0
+            ? <>
+                <optgroup label="Favorites">{favorites.map(option)}</optgroup>
+                <optgroup label="Other projects">{others.map(option)}</optgroup>
+              </>
+            : others.map(option)}
+          {stray && <option value={stray}>{stray}</option>}
+        </select>
+        <select
+          className="hours-select"
+          aria-label="Hours"
+          value={hours}
+          onChange={(e) => setHours(e.target.value)}
+        >
+          {hourOptions.map((h) => <option key={h} value={h}>{formatHours(h)}</option>)}
+        </select>
+        <button className="primary" onClick={save} disabled={!canSave || busy}>
+          {busy ? "Saving…" : editingId ? "Save" : "Add"}
+        </button>
+        {editingId && <button onClick={resetEditor} disabled={busy}>Cancel</button>}
+      </div>
+      {failure && <p className="auth-error" role="alert">{failure}</p>}
+      {hiddenNote && <p className="muted" role="status">{hiddenNote}</p>}
+    </div>
+  );
+}
+</script>
+  <script type="text/babel">
+/* src/components/ConfirmDialog.jsx */
+function ConfirmDialog({ title, message, confirmLabel, onConfirm, onCancel }) {
+  // Escape cancels, like clicking outside the dialog.
+  React.useEffect(() => {
+    const onKeyDown = (e) => { if (e.key === "Escape") onCancel(); };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [onCancel]);
+
+  return (
+    <div className="overlay" onClick={onCancel}>
+      <div
+        className="dialog"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="dialog-title"
+        aria-describedby="dialog-message"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 id="dialog-title">{title}</h2>
+        <p id="dialog-message">{message}</p>
+        <div className="actions">
+          {/* Cancel gets focus first so a stray Enter can't destroy data. */}
+          <button autoFocus onClick={onCancel}>Cancel</button>
+          <button className="danger-solid" onClick={onConfirm}>{confirmLabel}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+</script>
+  <script type="text/babel">
+/* src/components/LoginPage.jsx */
+// `onLogin(username, password)` resolves with null on success, or the reason it failed.
+// `notice`: why we are back here (for example an expired session), shown until the next attempt.
+function LoginPage({ onLogin, notice }) {
+  const [username, setUsername] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    setError("");
+    const failure = await onLogin(username, password);
+    if (failure) {
+      setError(failure);
+      setBusy(false);
+    } // on success this page is replaced by the calendar
+  };
+
+  const message = error || notice;
+
+  return (
+    <div className="auth-page">
+      <form className="auth-card" onSubmit={submit}>
+        <h1>Sign in</h1>
+
+        <label className="field">
+          <span>Username</span>
+          <input
+            type="text"
+            value={username}
+            autoFocus
+            autoComplete="username"
+            onChange={(e) => setUsername(e.target.value)}
+          />
+        </label>
+
+        <label className="field">
+          <span>Password</span>
+          <input
+            type="password"
+            value={password}
+            autoComplete="current-password"
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </label>
+
+        {message && <p className="auth-error" role="alert">{message}</p>}
+
+        <button className="primary" type="submit" disabled={!username || !password || busy}>
+          {busy ? "Signing in…" : "Sign in"}
+        </button>
+      </form>
+    </div>
+  );
+}
+</script>
+  <script type="text/babel">
+/* src/components/CalendarApp.jsx */
+// The calendar for one signed-in user. `user` is their username, `profile` their record from the API
+// (id, name, role, color) and `users` everyone in the user directory. The entries live in the API. It shows the entries
+// of the checked users only: at first just the signed-in user's.
+//
+// Administrators are not listed: they do not keep entries for themselves, they add, edit and delete the entries of
+// other users. So the list of users (the check boxes) and the User dropdown of the form leave them out, and a signed-in
+// administrator starts with nobody checked and chooses whose entries to work with.
+function CalendarApp({ user, profile, users, onLogout }) {
+  const now = new Date();
+  const isAdmin = profile.role === "admin";
+  const listedUsers = React.useMemo(() => users.filter((u) => u.role !== "admin"), [users]);
+  const todayKey = dateKey(now.getFullYear(), now.getMonth(), now.getDate());
+
+  // Start where the user was before a page reload (if they were somewhere), otherwise on today's month.
+  const [saved] = React.useState(loadView);
+  const [year, setYear] = React.useState(saved ? saved.year : now.getFullYear());
+  const [month, setMonth] = React.useState(saved ? saved.month : now.getMonth());
+  const [selected, setSelected] = React.useState(saved ? saved.selected : null);
+  // The checked users (their ids). At first only the signed-in user (nobody for an administrator, who is not listed);
+  // after a reload, as they were left.
+  const [shown, setShown] = React.useState(() => {
+    const listed = new Set([...listedUsers.map((u) => u.id), ...(isAdmin ? [] : [profile.id])]);
+    const kept = saved && saved.shown ? saved.shown.filter((id) => listed.has(id)) : null;
+    return kept && (kept.length > 0 || saved.shown.length === 0) ? kept : isAdmin ? [] : [profile.id];
+  });
+  React.useEffect(() => { saveView({ year, month, selected, shown }); }, [year, month, selected, shown]);
+  const toggleShown = (id) => setShown((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
+  const [confirmingClear, setConfirmingClear] = React.useState(false);
+  const [clearError, setClearError] = React.useState("");
+  const catalog = useProjects();                     // the customer-project choices, from the API
+
+  // Who an entry belongs to, from the user directory (the signed-in user's own record is a fallback):
+  // { id, username, label, color, active }, where label is the full name or else the username.
+  const known = React.useMemo(() => {
+    const byName = {};
+    for (const u of [...users, profile]) {
+      byName[u.username.toLowerCase()] = {
+        id: u.id, username: u.username, label: u.full_name || u.username, color: u.color, active: u.is_active !== false,
+      };
+    }
+    return byName;
+  }, [users, profile]);
+  const userOf = (username) => known[String(username).toLowerCase()];
+  // The users an entry can be given to: the active ones (the API refuses a deactivated user), administrators left out.
+  const owners = React.useMemo(() => {
+    const list = listedUsers.filter((u) => u.is_active).map((u) => known[u.username.toLowerCase()]);
+    return isAdmin || list.some((o) => o.username === user) ? list : [known[user.toLowerCase()], ...list];
+  }, [listedUsers, known, user, isAdmin]);
+
+  // What the form shows -> the ids the API wants (undefined when unknown).
+  const projectIdOf = React.useCallback(
+    (label) => (catalog.projects.find((p) => p.label === label) || {}).id, [catalog.projects]);
+  const userIdOf = React.useCallback((username) => (known[String(username).toLowerCase()] || {}).id, [known]);
+  const activeUserIdOf = React.useCallback((username) => {
+    const u = known[String(username).toLowerCase()];
+    return u && u.active ? u.id : undefined;
+  }, [known]);
+
+  // The entries on screen: the first to the last cell of the month grid (adjacent-month days included).
+  const [from, to] = React.useMemo(() => {
+    const grid = monthGrid(year, month);
+    return [grid[0].key, grid[grid.length - 1].key];
+  }, [year, month]);
+  const entriesState = useEntries({ from, to, userIds: shown, projectIdOf, userIdOf });
+  const { addEntry, updateEntry, removeEntry, clearAll } = entriesState;
+  // Only the checked users' entries are shown: also right after an entry is added or moved to someone unchecked.
+  const isShown = (username) => shown.includes(userIdOf(username));
+  const entries = React.useMemo(() => {
+    const visible = {};
+    for (const [date, list] of Object.entries(entriesState.entries)) {
+      const kept = list.filter((e) => shown.includes(e.userId));
+      if (kept.length) visible[date] = kept;
+    }
+    return visible;
+  }, [entriesState.entries, shown]);
+
+  const changeMonth = (delta) => {
+    const d = new Date(year, month + delta, 1);
+    setYear(d.getFullYear());
+    setMonth(d.getMonth());
+  };
+
+  // Loads what is on screen again, to see what others changed: the entries, and the project choices.
+  const refresh = () => {
+    entriesState.reload();
+    catalog.reload();
+  };
+
+  const goToday = () => {
+    setYear(now.getFullYear());
+    setMonth(now.getMonth());
+    setSelected(todayKey);
+  };
+
+  const confirmClear = async () => {
+    const result = await clearAll();
+    setClearError(result.ok ? "" : `Clear data failed: ${result.error}`);
+    setSelected(null);
+    setConfirmingClear(false);
+  };
+
+  return (
+    <div className="app">
+      <Header
+        year={year}
+        month={month}
+        profile={profile}
+        onPrev={() => changeMonth(-1)}
+        onToday={goToday}
+        onNext={() => changeMonth(1)}
+        onRefresh={refresh}
+        refreshing={entriesState.status === "loading"}
+        onClear={() => setConfirmingClear(true)}
+        canClear
+        onLogout={onLogout}
+      />
+      <UserList users={listedUsers} meId={profile.id} shown={shown} onToggle={toggleShown} />
+      {shown.length === 0 && (
+        <p className="muted banner">No user is checked, so no entries are shown.</p>
+      )}
+      {catalog.status === "error" && (
+        <p className="auth-error banner" role="alert">
+          The customer-project list could not be loaded: {catalog.error}{" "}
+          <button onClick={catalog.reload}>Retry</button>
+        </p>
+      )}
+      {entriesState.status === "error" && (
+        <p className="auth-error banner" role="alert">
+          The entries could not be loaded: {entriesState.error}{" "}
+          <button onClick={entriesState.reload}>Retry</button>
+        </p>
+      )}
+      {entriesState.truncated && (
+        <p className="auth-error banner" role="alert">
+          Only the first {ENTRIES_LIMIT} entries of these dates are shown.
+        </p>
+      )}
+      {clearError && (
+        <p className="auth-error banner" role="alert">
+          {clearError} <button onClick={() => setClearError("")}>Dismiss</button>
+        </p>
+      )}
+      <ImportBanner
+        ready={catalog.status === "ready"}
+        projectIdOf={projectIdOf}
+        activeUserIdOf={activeUserIdOf}
+        onImported={entriesState.reload}
+      />
+      <CalendarGrid
+        year={year}
+        month={month}
+        entries={entries}
+        userOf={userOf}
+        selected={selected}
+        todayKey={todayKey}
+        onSelect={setSelected}
+      />
+      <EntryPanel
+        dateKey={selected}
+        catalog={catalog}
+        owners={owners}
+        currentUser={user}
+        userOf={userOf}
+        isShown={isShown}
+        entries={selected ? entries[selected] || [] : []}
+        onAdd={addEntry}
+        onUpdate={updateEntry}
+        onRemove={removeEntry}
+      />
+      {confirmingClear && (
+        <ConfirmDialog
+          title="Clear all data?"
+          message={`This permanently deletes ALL entries saved for ${user}, in every month. Other users' entries are not affected. This cannot be undone.`}
+          confirmLabel="Clear data"
+          onConfirm={confirmClear}
+          onCancel={() => setConfirmingClear(false)}
+        />
+      )}
+    </div>
+  );
+}
+</script>
+  <script type="text/babel">
+/* src/components/App.jsx */
+// Auth gate: the login page until someone is signed in, then their calendar.
+// Signing in and the list of users both come from the API.
+function App() {
+  const [session, setSession] = React.useState(null);              // { user, users } once signed in
+  const [checking, setChecking] = React.useState(() => !!getToken()); // a token from this tab is being checked
+  const [notice, setNotice] = React.useState("");                  // why the login page is showing, if not just "signed out"
+
+  const start = (user, users) => {
+    // Entries saved before accounts existed have no owner: the first user in the list adopts them.
+    if (users.length && user.id === Math.min(...users.map((u) => u.id))) adoptLegacyEntries(user.username);
+    setNotice("");
+    setSession({ user, users });
+  };
+
+  // A page reload keeps the tab's token: check it with the API, and get the user list.
+  React.useEffect(() => {
+    setUnauthorizedHandler(() => {
+      setSession(null);
+      setNotice("Your session has ended. Please sign in again.");
+    });
+    if (!getToken()) return undefined;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const user = await restoreSession();
+        const users = await loadUsers();
+        if (!cancelled && user) start(user, users);
+      } catch (e) {
+        if (!cancelled && e.status !== 401) setNotice(e.message); // a 401 already said "session ended"
+      } finally {
+        if (!cancelled) setChecking(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Resolves with null on success, or the reason it failed (shown on the login page).
+  const login = async (username, password) => {
+    const result = await loginUser(username, password);
+    if (!result.ok) return result.error;
+    clearView();                                    // a new sign-in starts on today's month
+    start(result.user, await loadUsers());
+    return null;
+  };
+
+  const logout = async () => {
+    clearView();
+    setSession(null);
+    setNotice("");
+    await logoutUser();
+  };
+
+  if (checking) {
+    return <div className="auth-page"><p className="auth-note">Checking your session…</p></div>;
+  }
+  if (!session) return <LoginPage onLogin={login} notice={notice} />;
+  // key: a different user always gets a fresh calendar (month, selection, open dialogs).
+  return (
+    <CalendarApp
+      key={session.user.id}
+      user={session.user.username}
+      profile={session.user}
+      users={session.users}
+      onLogout={logout}
+    />
+  );
+}
+</script>
+  <script type="text/babel">
+/* src/main.jsx */
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simple Calendar</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Libraries -->
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.4/babel.min.js"></script>
+
+  <!-- Config, utilities and state (plain JS). Files share globals, so order matters. -->
+  <script src="src/config.js"></script>
+  <script src="src/utils/dates.js"></script>
+  <script src="src/utils/format.js"></script>
+  <script src="src/utils/storage.js"></script>
+  <script src="src/utils/view.js"></script>
+  <script src="src/utils/api.js"></script>
+  <script src="src/utils/auth.js"></script>
+  <script src="src/utils/importLocal.js"></script>
+  <script src="src/hooks/useEntries.js"></script>
+  <script src="src/hooks/useProjects.js"></script>
+
+  <!-- Components (JSX, transpiled in the browser). Leaves first, App last. -->
+  <script type="text/babel" src="src/components/Header.jsx"></script>
+  <script type="text/babel" src="src/components/UserList.jsx"></script>
+  <script type="text/babel" src="src/components/ImportBanner.jsx"></script>
+  <script type="text/babel" src="src/components/DayCell.jsx"></script>
+  <script type="text/babel" src="src/components/CalendarGrid.jsx"></script>
+  <script type="text/babel" src="src/components/EntryPanel.jsx"></script>
+  <script type="text/babel" src="src/components/ConfirmDialog.jsx"></script>
+  <script type="text/babel" src="src/components/LoginPage.jsx"></script>
+  <script type="text/babel" src="src/components/CalendarApp.jsx"></script>
+  <script type="text/babel" src="src/components/App.jsx"></script>
+  <script type="text/babel" src="src/main.jsx"></script>
+</body>
+</html>

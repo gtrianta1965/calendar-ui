@@ -1,0 +1,156 @@
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --border: #dfe1e6;
+  --text: #172b4d;
+  --muted: #6b778c;
+  --accent: #0052cc;
+  --accent-soft: #e6effc;
+  --today: #fff4d6;
+  --danger: #c9372c;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+.app { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+/* Buttons */
+button {
+  font: inherit; cursor: pointer; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--text); padding: 6px 12px;
+}
+button:hover { background: var(--accent-soft); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.primary:hover { background: #0747a6; }
+button.danger { color: var(--danger); }
+
+/* Header */
+.header { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.header h1 { flex: 1 1 auto; margin: 0; font-size: 1.5rem; }
+.header .user { color: var(--muted); font-size: .9rem; }
+.user-dot { display: inline-block; width: .7em; height: .7em; border-radius: 50%; margin: 0 .35em 0 .2em; }
+
+/* Who is in the system: everyone from the API's user directory, in their color */
+.user-list { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0 0 12px; padding: 0; list-style: none; color: var(--muted); font-size: .85rem; }
+.user-list li { display: flex; align-items: center; }
+.user-list label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.user-list input { margin: 0 2px 0 0; cursor: pointer; }
+.user-list .user-dot { margin-left: 0; }
+.user-list .inactive { font-weight: 400; font-style: italic; }
+.user-list .me { color: var(--text); font-weight: 600; }
+
+/* Calendar grid */
+.grid {
+  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--border); gap: 1px; overflow: hidden;
+}
+.dow {
+  background: #ebecf0; padding: 8px; text-align: center;
+  font-size: .8rem; font-weight: 600; color: var(--muted);
+}
+.cell {
+  background: var(--surface); min-height: 110px; padding: 6px;
+  cursor: pointer; display: flex; flex-direction: column; gap: 4px;
+  overflow: hidden;
+}
+.cell:hover { background: var(--accent-soft); }
+/* Days of the previous/next month: dimmed, but still clickable and editable. */
+.cell.outside { background: #f7f8fa; }
+.cell.outside:hover { background: var(--accent-soft); }
+.cell.outside:not(.today) .num { color: var(--muted); font-weight: 500; }
+.cell.today { background: var(--today); }
+.cell.selected { outline: 2px solid var(--accent); outline-offset: -2px; }
+.num { font-size: .85rem; font-weight: 600; }
+.today .num {
+  background: var(--accent); color: #fff; border-radius: 50%;
+  width: 24px; height: 24px; display: inline-flex;
+  align-items: center; justify-content: center;
+}
+/* An entry is drawn in its owner's color: --user-color is set on it from the user directory (accent blue when unknown).
+   The text stays dark and only the tint and the left bar carry the color, so any user color, even a light one, stays readable. */
+.entry {
+  font-size: .75rem; background: var(--accent-soft); color: var(--text);
+  border-left: 3px solid var(--accent); border-radius: 3px;
+  padding: 2px 5px; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis;
+}
+.entry {
+  background: color-mix(in srgb, var(--user-color, var(--accent)) 16%, #fff);
+  border-left-color: var(--user-color, var(--accent));
+}
+
+/* Entry panel */
+.panel {
+  margin-top: 16px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 8px; padding: 16px;
+}
+.panel h2 { margin: 0 0 12px; font-size: 1.1rem; }
+.panel ul { list-style: none; margin: 0 0 12px; padding: 0; }
+.panel li {
+  display: flex; gap: 8px; align-items: center; padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+.panel li .text { flex: 1; word-break: break-word; }
+.panel li .owner { color: var(--muted); font-size: .85rem; white-space: nowrap; }
+.panel li .owner .user-dot { margin-left: 0; }
+.panel .hours { font-weight: 600; font-variant-numeric: tabular-nums; }
+.panel select {
+  font: inherit; padding: 6px 10px; background: var(--surface); color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px; min-width: 0;
+}
+.owner-select { flex: 0 1 170px; }
+.project-select { flex: 1 1 220px; }
+.hours-select { flex: 0 0 110px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+.muted { color: var(--muted); font-size: .9rem; }
+
+@media (max-width: 640px) {
+  .cell { min-height: 70px; }
+  .entry { font-size: .65rem; }
+}
+
+button:disabled { opacity: .5; cursor: not-allowed; }
+button:disabled:not(.primary) { background: var(--surface); }
+button.primary:disabled { background: var(--accent); }
+
+/* Confirm dialog */
+.overlay {
+  position: fixed; inset: 0; background: rgba(9, 30, 66, .54);
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+  z-index: 100;
+}
+.dialog {
+  background: var(--surface); border-radius: 8px; padding: 24px;
+  width: 100%; max-width: 420px; box-shadow: 0 8px 32px rgba(9, 30, 66, .35);
+}
+.dialog h2 { margin: 0 0 8px; font-size: 1.2rem; }
+.dialog p { margin: 0 0 20px; color: var(--muted); line-height: 1.4; }
+.dialog .actions { display: flex; justify-content: flex-end; gap: 8px; }
+button.danger-solid { background: var(--danger); border-color: var(--danger); color: #fff; }
+button.danger-solid:hover { background: #a32a21; }
+
+/* Login / create account page */
+.auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.auth-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 28px; width: 100%; max-width: 380px;
+  display: flex; flex-direction: column; gap: 14px;
+  box-shadow: 0 4px 16px rgba(9, 30, 66, .12);
+}
+.auth-card h1 { margin: 0 0 4px; font-size: 1.4rem; }
+.field { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; font-weight: 600; color: var(--muted); }
+.field input {
+  font: inherit; font-weight: 400; color: var(--text); padding: 8px 10px;
+  border: 1px solid var(--border); border-radius: 6px; min-width: 0;
+}
+.auth-error { margin: 0; color: var(--danger); font-size: .9rem; }
+.auth-note { color: var(--muted); }
+.banner { margin: 0 0 12px; }
+.banner button { margin-left: 6px; }
+.import-banner { color: var(--text); background: var(--accent-soft); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-size: .9rem; }
