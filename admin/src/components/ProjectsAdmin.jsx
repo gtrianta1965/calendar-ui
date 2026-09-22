@@ -29,6 +29,7 @@ function ProjectsAdmin({ reloadToken, customersVersion }) {
     },
     { key: "name", label: "Project", type: "text", required: true },
     { key: "project_manager", label: "Project manager", type: "text" },
+    { key: "project_number", label: "Project number", type: "text" },
     { key: "is_active", label: "Status", type: "checkbox", omitOnCreate: true },
     {
       key: "is_selectable", label: "In dropdown", type: "readonly",

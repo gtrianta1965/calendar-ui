@@ -61,7 +61,10 @@ function DataTable({ title, columns, rows, idKey = "id", newDefaults = {}, onCre
           continue;
         }
         if (c.immutableAfterCreate) continue; // never sent back: nothing to change
-        const value = c.parse ? c.parse(raw) : raw;
+        let value = c.parse ? c.parse(raw) : raw;
+        // Clearing an optional text field means "remove it" (null), not "set it to an empty string" - the API
+        // refuses the latter for a field with a minimum length once it is present at all (e.g. project_manager).
+        if ((c.type === "text" || c.type === "email") && value === "") value = null;
         if (value !== row[c.key]) changes[c.key] = value;
       }
       if (Object.keys(changes).length === 0) { cancel(); return; }
