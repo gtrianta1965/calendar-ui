@@ -66,6 +66,7 @@ function AdminApp() {
     { id: "users", label: "Users" },
     { id: "customers", label: "Customers" },
     { id: "projects", label: "Projects" },
+    { id: "favorites", label: "Favorites" },
   ];
 
   return (
@@ -86,6 +87,7 @@ function AdminApp() {
       {tab === "users" && <UsersAdmin />}
       {tab === "customers" && <CustomersAdmin onChanged={() => setCustomersVersion((v) => v + 1)} />}
       {tab === "projects" && <ProjectsAdmin customersVersion={customersVersion} />}
+      {tab === "favorites" && <FavoritesAdmin />}
       <StatusBar />
     </div>
   );

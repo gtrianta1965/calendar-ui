@@ -39,3 +39,21 @@
 .editing-extra td { white-space: normal; padding-top: 0; }
 .inline-field { display: inline-flex; align-items: center; gap: 6px; margin-right: 20px; font-size: .85rem; color: var(--muted); }
 .inline-field input { font: inherit; padding: 4px 8px; border: 1px solid var(--border); border-radius: 6px; }
+
+/* Favorites tab: projects on the left, everyone (with a checkbox) on the right. */
+.favorites-columns { display: flex; gap: 20px; flex-wrap: wrap; }
+.favorites-pane { flex: 1 1 280px; min-width: 0; }
+.favorites-pane h3 { margin: 0 0 8px; font-size: .95rem; }
+.favorites-pane h3 em { font-style: normal; color: var(--text); }
+.favorites-list { list-style: none; margin: 0; padding: 0; max-height: 420px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; }
+.favorites-list li + li { border-top: 1px solid var(--border); }
+.favorites-pick {
+  display: block; width: 100%; text-align: left; border: none; border-radius: 0;
+  background: var(--surface); padding: 8px 10px; font-size: .88rem;
+}
+.favorites-pick:hover { background: var(--accent-soft); }
+.favorites-pick.active { background: var(--accent); color: #fff; }
+.favorites-pick.active .muted-cell { color: #d7e3fa; }
+.favorites-user { display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-size: .88rem; cursor: pointer; }
+.favorites-user:hover { background: var(--accent-soft); }
+.favorites-user input[type="checkbox"] { margin: 0; }
