@@ -18,16 +18,17 @@ body {
 }
 .app { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
 
-/* Buttons */
-button {
+/* Buttons (a.button: a link made to look like one, e.g. the header's Admin link) */
+button, a.button {
   font: inherit; cursor: pointer; border-radius: 6px;
   border: 1px solid var(--border); background: var(--surface);
   color: var(--text); padding: 6px 12px;
+  text-decoration: none; display: inline-block; line-height: 1.4;
 }
-button:hover { background: var(--accent-soft); }
-button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-button.primary:hover { background: #0747a6; }
-button.danger { color: var(--danger); }
+button:hover, a.button:hover { background: var(--accent-soft); }
+button.primary, a.button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.primary:hover, a.button.primary:hover { background: #0747a6; }
+button.danger, a.button.danger { color: var(--danger); }
 
 /* Header */
 .header { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }

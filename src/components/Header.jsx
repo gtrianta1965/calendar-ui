@@ -14,6 +14,11 @@ function Header({ year, month, profile, onPrev, onToday, onNext, onRefresh, refr
         {refreshing ? "Refreshing…" : "Refresh"}
       </button>
       <button className="danger" onClick={onClear} disabled={!canClear}>Clear data</button>
+      {profile.role === "admin" && (
+        <a className="button" href="admin/index.html" title="Manage users, customers and projects">
+          Admin
+        </a>
+      )}
       <button onClick={onLogout}>Log out</button>
     </div>
   );
