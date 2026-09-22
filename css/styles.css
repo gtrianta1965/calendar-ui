@@ -119,7 +119,14 @@ button.danger, a.button.danger { color: var(--danger); }
 .owner-select { flex: 0 1 170px; }
 .project-select { flex: 1 1 220px; }
 .hours-select { flex: 0 0 110px; }
+.type-select { flex: 0 0 120px; }
 .row { display: flex; flex-wrap: wrap; gap: 8px; }
+.note-row { margin-top: 8px; }
+.note-input {
+  flex: 1 1 auto; font: inherit; padding: 6px 10px; background: var(--surface); color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px; min-width: 0;
+}
+.panel li .type { color: var(--muted); font-size: .8rem; white-space: nowrap; }
 .muted { color: var(--muted); font-size: .9rem; }
 
 @media (max-width: 640px) {

@@ -5,6 +5,8 @@ function EntryPanel({ dateKey: selectedKey, owners, currentUser, userOf, isShown
   // Select values are strings. project "" means nothing chosen yet; hours starts at the default.
   const [project, setProject] = React.useState("");
   const [hours, setHours] = React.useState(String(DEFAULT_HOURS));
+  const [type, setType] = React.useState("forecast");    // a new entry starts as a forecast, not yet worked
+  const [note, setNote] = React.useState("");             // one line, optional
   // Whose entry: the signed-in user when adding, the entry's own when editing. An administrator is not among the owners
   // (they do not keep entries for themselves), so they must choose one: "" means nobody chosen yet.
   const defaultOwner = owners.some((o) => o.username === currentUser) ? currentUser : "";
@@ -22,7 +24,8 @@ function EntryPanel({ dateKey: selectedKey, owners, currentUser, userOf, isShown
   const catalog = useProjects(ownerId);
 
   const resetEditor = () => {
-    setProject(""); setHours(String(DEFAULT_HOURS)); setOwner(defaultOwner); setEditingId(null); setFailure(""); setHiddenNote("");
+    setProject(""); setHours(String(DEFAULT_HOURS)); setType("forecast"); setNote("");
+    setOwner(defaultOwner); setEditingId(null); setFailure(""); setHiddenNote("");
   };
 
   // Start with a clean editor whenever a different date is selected.
@@ -43,7 +46,7 @@ function EntryPanel({ dateKey: selectedKey, owners, currentUser, userOf, isShown
     if (!canSave || busy) return;
     setBusy(true);
     setFailure("");
-    const fields = { project, hours: Number(hours), user: owner };
+    const fields = { project, hours: Number(hours), user: owner, type, note };
     const result = editingId ? await onUpdate(selectedKey, editingId, fields) : await onAdd(selectedKey, fields);
     setBusy(false);
     if (!result.ok) {
@@ -72,6 +75,8 @@ function EntryPanel({ dateKey: selectedKey, owners, currentUser, userOf, isShown
     setOwner(e.user);
     setProject(e.project);
     setHours(String(e.hours));
+    setType(e.type || "forecast");
+    setNote(e.note || "");
   };
 
   // Favorites come first from the API; when there are any, they get a group of their own.
@@ -93,56 +98,79 @@ function EntryPanel({ dateKey: selectedKey, owners, currentUser, userOf, isShown
       {entries.length === 0 && <p className="muted">No entries yet.</p>}
       <ul>
         {entries.map((e) => (
-          <li key={e.id}>
+          <li key={e.id} title={e.note || undefined}>
             <span className="text">{e.project}</span>
             <span className="owner" title="Whose entry">
               <span className="user-dot" style={{ background: (userOf(e.user) || {}).color }} />
               {(userOf(e.user) || {}).label || e.user}
             </span>
+            <span className="type">{e.type === "actual" ? "Actual" : "Forecast"}</span>
             <span className="hours">{formatHours(e.hours)}</span>
             <button onClick={() => startEdit(e)} disabled={busy}>Edit</button>
             <button className="danger" onClick={() => remove(e.id)} disabled={busy}>Delete</button>
           </li>
         ))}
       </ul>
-      <div className="row" onKeyDown={(e) => { if (e.key === "Escape") resetEditor(); }}>
-        <select
-          className="owner-select"
-          aria-label="User"
-          value={owner}
-          onChange={(e) => setOwner(e.target.value)}
-        >
-          {owner === "" && <option value="" disabled>User…</option>}
-          {owners.map((o) => <option key={o.username} value={o.username}>{o.label}</option>)}
-          {strayOwner && <option value={strayOwner}>{strayOwner}</option>}
-        </select>
-        <select
-          className="project-select"
-          aria-label="Customer - Project"
-          value={project}
-          onChange={(e) => setProject(e.target.value)}
-        >
-          <option value="" disabled>{placeholder}</option>
-          {favorites.length > 0
-            ? <>
-                <optgroup label="Favorites">{favorites.map(option)}</optgroup>
-                <optgroup label="Other projects">{others.map(option)}</optgroup>
-              </>
-            : others.map(option)}
-          {stray && <option value={stray}>{stray}</option>}
-        </select>
-        <select
-          className="hours-select"
-          aria-label="Hours"
-          value={hours}
-          onChange={(e) => setHours(e.target.value)}
-        >
-          {hourOptions.map((h) => <option key={h} value={h}>{formatHours(h)}</option>)}
-        </select>
-        <button className="primary" onClick={save} disabled={!canSave || busy}>
-          {busy ? "Saving…" : editingId ? "Save" : "Add"}
-        </button>
-        {editingId && <button onClick={resetEditor} disabled={busy}>Cancel</button>}
+      <div onKeyDown={(e) => { if (e.key === "Escape") resetEditor(); }}>
+        <div className="row">
+          <select
+            className="owner-select"
+            aria-label="User"
+            value={owner}
+            onChange={(e) => setOwner(e.target.value)}
+          >
+            {owner === "" && <option value="" disabled>User…</option>}
+            {owners.map((o) => <option key={o.username} value={o.username}>{o.label}</option>)}
+            {strayOwner && <option value={strayOwner}>{strayOwner}</option>}
+          </select>
+          <select
+            className="project-select"
+            aria-label="Customer - Project"
+            value={project}
+            onChange={(e) => setProject(e.target.value)}
+          >
+            <option value="" disabled>{placeholder}</option>
+            {favorites.length > 0
+              ? <>
+                  <optgroup label="Favorites">{favorites.map(option)}</optgroup>
+                  <optgroup label="Other projects">{others.map(option)}</optgroup>
+                </>
+              : others.map(option)}
+            {stray && <option value={stray}>{stray}</option>}
+          </select>
+          <select
+            className="hours-select"
+            aria-label="Hours"
+            value={hours}
+            onChange={(e) => setHours(e.target.value)}
+          >
+            {hourOptions.map((h) => <option key={h} value={h}>{formatHours(h)}</option>)}
+          </select>
+          <select
+            className="type-select"
+            aria-label="Actual or forecast"
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+          >
+            <option value="forecast">Forecast</option>
+            <option value="actual">Actual</option>
+          </select>
+          <button className="primary" onClick={save} disabled={!canSave || busy}>
+            {busy ? "Saving…" : editingId ? "Save" : "Add"}
+          </button>
+          {editingId && <button onClick={resetEditor} disabled={busy}>Cancel</button>}
+        </div>
+        <div className="row note-row">
+          <input
+            type="text"
+            className="note-input"
+            aria-label="Note"
+            placeholder="Note (optional)"
+            value={note}
+            maxLength={1000}
+            onChange={(e) => setNote(e.target.value)}
+          />
+        </div>
       </div>
       {failure && <p className="auth-error" role="alert">{failure}</p>}
       {hiddenNote && <p className="muted" role="status">{hiddenNote}</p>}

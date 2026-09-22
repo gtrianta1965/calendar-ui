@@ -5,7 +5,8 @@
 // signing in only says WHO you are: every entry can be added for, edited or deleted by anyone; only "clear all" is
 // limited to your own.
 //
-// An entry, as the components see it: { id, user (username), userId, project (label), projectId, hours, date }.
+// An entry, as the components see it: { id, user (username), userId, project (label), projectId, hours, date,
+// type ("actual" or "forecast"), note (a string, "" when there is none) }.
 // Entries are grouped by date: { "YYYY-MM-DD": [entry, ...] }.
 //
 // `projectIdOf(label)` and `userIdOf(username)` translate what the form shows into the ids the API wants
@@ -21,6 +22,8 @@ const toUiEntry = (e) => ({
   projectId: e.project_id,
   hours: e.hours,
   date: e.entry_date,
+  type: e.entry_type,
+  note: e.note || "",
 });
 
 // The order the API uses: by user, then by creation.
@@ -90,22 +93,28 @@ function useEntries({ from, to, userIds, projectIdOf, userIdOf }) {
     return id;
   };
 
-  // `user` is whose entry it is; left out, it is the signed-in user (the API's default).
-  const addEntry = (date, { project, hours, user: owner }) => attempt(async () => {
-    const body = { project_id: projectId(project), entry_date: date, hours };
+  // `user` is whose entry it is; left out, it is the signed-in user (the API's default). `note`, trimmed, is left
+  // out entirely when blank (the API's own default, no note, rather than sending an empty string it would refuse).
+  const addEntry = (date, { project, hours, user: owner, type, note }) => attempt(async () => {
+    const body = { project_id: projectId(project), entry_date: date, hours, entry_type: type };
     if (owner) body.user_id = ownerId(owner);
+    if (note && note.trim()) body.note = note.trim();
     const created = toUiEntry(await apiCreateEntry(body));
     setState((s) => ({ ...s, entries: withEntry(s.entries, created.id, created) }));
   });
 
-  // Only what changed is sent, so an entry on a since-retired project can keep it.
-  const updateEntry = (date, id, { project, hours, user: owner }) => attempt(async () => {
+  // Only what changed is sent, so an entry on a since-retired project can keep it. A note that was cleared is sent
+  // as `null` (the API's way to clear it); one that never changes is not sent at all.
+  const updateEntry = (date, id, { project, hours, user: owner, type, note }) => attempt(async () => {
     const existing = (state.entries[date] || []).find((e) => e.id === id);
     if (!existing) throw new Error("This entry no longer exists.");
     const changes = {};
     if (project !== existing.project) changes.project_id = projectId(project);
     if (Number(hours) !== existing.hours) changes.hours = Number(hours);
     if (owner && owner !== existing.user) changes.user_id = ownerId(owner);
+    if (type && type !== existing.type) changes.entry_type = type;
+    const trimmedNote = (note || "").trim();
+    if (trimmedNote !== (existing.note || "")) changes.note = trimmedNote || null;
     if (Object.keys(changes).length === 0) return;
     const updated = toUiEntry(await apiUpdateEntry(id, changes));
     setState((s) => ({ ...s, entries: withEntry(s.entries, id, updated) }));
