@@ -52,17 +52,20 @@ function App() {
   };
 
   if (checking) {
-    return <div className="auth-page"><p className="auth-note">Checking your session…</p></div>;
+    return <><div className="auth-page"><p className="auth-note">Checking your session…</p></div><StatusBar /></>;
   }
-  if (!session) return <LoginPage onLogin={login} notice={notice} />;
+  if (!session) return <><LoginPage onLogin={login} notice={notice} /><StatusBar /></>;
   // key: a different user always gets a fresh calendar (month, selection, open dialogs).
   return (
-    <CalendarApp
-      key={session.user.id}
-      user={session.user.username}
-      profile={session.user}
-      users={session.users}
-      onLogout={logout}
-    />
+    <>
+      <CalendarApp
+        key={session.user.id}
+        user={session.user.username}
+        profile={session.user}
+        users={session.users}
+        onLogout={logout}
+      />
+      <StatusBar />
+    </>
   );
 }

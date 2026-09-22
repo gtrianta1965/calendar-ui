@@ -43,19 +43,22 @@ function AdminApp() {
   };
 
   if (checking) {
-    return <div className="auth-page"><p className="auth-note">Checking your session…</p></div>;
+    return <><div className="auth-page"><p className="auth-note">Checking your session…</p></div><StatusBar /></>;
   }
-  if (!session) return <LoginPage onLogin={login} notice={notice} />;
+  if (!session) return <><LoginPage onLogin={login} notice={notice} /><StatusBar /></>;
 
   if (session.role !== "admin") {
     return (
-      <div className="auth-page">
-        <div className="auth-card">
-          <h1>Administrators only</h1>
-          <p>{session.full_name || session.username} is signed in, but this console needs an administrator.</p>
-          <button className="primary" onClick={logout}>Sign in as someone else</button>
+      <>
+        <div className="auth-page">
+          <div className="auth-card">
+            <h1>Administrators only</h1>
+            <p>{session.full_name || session.username} is signed in, but this console needs an administrator.</p>
+            <button className="primary" onClick={logout}>Sign in as someone else</button>
+          </div>
         </div>
-      </div>
+        <StatusBar />
+      </>
     );
   }
 
@@ -83,6 +86,7 @@ function AdminApp() {
       {tab === "users" && <UsersAdmin />}
       {tab === "customers" && <CustomersAdmin onChanged={() => setCustomersVersion((v) => v + 1)} />}
       {tab === "projects" && <ProjectsAdmin customersVersion={customersVersion} />}
+      <StatusBar />
     </div>
   );
 }
