@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calendar Admin</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Libraries: the same pinned versions as the main app (index.html). -->
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.4/babel.min.js"></script>
+
+  <!-- Reused from the main app, unmodified: the API address, the HTTP/auth plumbing, and the sign-in page. -->
+  <script src="../src/config.js"></script>
+  <script src="../src/utils/api.js"></script>
+  <script src="../src/utils/auth.js"></script>
+  <script type="text/babel" src="../src/components/LoginPage.jsx"></script>
+
+  <!-- Admin-only: everything specific to this console lives under admin/. -->
+  <script src="src/adminApi.js"></script>
+  <script src="src/format.js"></script>
+  <script type="text/babel" src="src/components/DataTable.jsx"></script>
+  <script type="text/babel" src="src/components/UsersAdmin.jsx"></script>
+  <script type="text/babel" src="src/components/CustomersAdmin.jsx"></script>
+  <script type="text/babel" src="src/components/ProjectsAdmin.jsx"></script>
+  <script type="text/babel" src="src/components/AdminApp.jsx"></script>
+  <script type="text/babel" src="src/main.jsx"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+/* Admin-only styling: the grid, tabs and pills. Everything else (buttons, .header, .auth-*, the color
+   variables) comes from ../css/styles.css, loaded before this file - so the admin console looks like the
+   same product, not a different one. */
+
+.tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+.tabs .tab { border: none; border-radius: 6px 6px 0 0; background: transparent; padding: 8px 16px; }
+.tabs .tab:hover { background: var(--accent-soft); }
+.tabs .tab.active { background: var(--surface); border: 1px solid var(--border); border-bottom-color: var(--surface); margin-bottom: -1px; font-weight: 600; }
+
+.data-table { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+.data-table-head { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+.data-table-head h2 { margin: 0; font-size: 1.1rem; flex: 0 0 auto; }
+.data-table-head .filter { flex: 1 1 160px; min-width: 0; }
+.data-table-head .filter,
+.data-table input[type="text"],
+.data-table input[type="email"],
+.data-table input[type="password"],
+.data-table select {
+  font: inherit; padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text);
+}
+
+.table-scroll { overflow-x: auto; }
+.data-table table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.data-table th, .data-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; white-space: nowrap; }
+.data-table th { color: var(--muted); font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; }
+.data-table tr.editing td { background: var(--accent-soft); }
+.data-table td.actions, .data-table th.actions { white-space: nowrap; text-align: right; }
+.data-table td.actions button { margin-left: 6px; }
+.data-table .static { color: var(--text); }
+.data-table .muted-cell { color: var(--muted); }
+
+.color-field { display: inline-flex; align-items: center; gap: 6px; }
+.color-field input { width: 8em; }
+
+.pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: .78rem; font-weight: 600; }
+.pill-on { background: #e3fcef; color: #006644; }
+.pill-off { background: #f4f5f7; color: var(--muted); }
+
+.editing-extra td { white-space: normal; padding-top: 0; }
+.inline-field { display: inline-flex; align-items: center; gap: 6px; margin-right: 20px; font-size: .85rem; color: var(--muted); }
+.inline-field input { font: inherit; padding: 4px 8px; border: 1px solid var(--border); border-radius: 6px; }
