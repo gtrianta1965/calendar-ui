@@ -57,3 +57,15 @@
 .favorites-user { display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-size: .88rem; cursor: pointer; }
 .favorites-user:hover { background: var(--accent-soft); }
 .favorites-user input[type="checkbox"] { margin: 0; }
+
+/* Export tab: a small form (month picker + optional filters), then Download buttons below. */
+.export-admin p.muted { margin: 0 0 16px; max-width: 60ch; }
+.export-fields { display: flex; flex-wrap: wrap; gap: 14px 20px; margin-bottom: 16px; }
+.export-field { display: flex; flex-direction: column; gap: 4px; font-size: .8rem; font-weight: 600; color: var(--muted); }
+.export-field select, .export-field input {
+  font: inherit; font-weight: 400; color: var(--text); padding: 6px 8px;
+  border: 1px solid var(--border); border-radius: 6px; min-width: 12em;
+}
+.export-all-columns { margin: 0 0 4px; }
+.export-columns-note { margin: 0 0 16px; font-size: .82rem; }
+.export-actions { display: flex; gap: 10px; }

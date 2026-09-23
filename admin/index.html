@@ -23,6 +23,8 @@
   <script type="text/babel" src="../src/components/StatusBar.jsx"></script>
 
   <!-- Admin-only: everything specific to this console lives under admin/. -->
+  <!-- SheetJS: only the Export tab's "Download XLSX" button needs it (adminApi.js's global `XLSX`). -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="src/adminApi.js"></script>
   <script src="src/format.js"></script>
   <script type="text/babel" src="src/components/DataTable.jsx"></script>
@@ -30,6 +32,7 @@
   <script type="text/babel" src="src/components/CustomersAdmin.jsx"></script>
   <script type="text/babel" src="src/components/ProjectsAdmin.jsx"></script>
   <script type="text/babel" src="src/components/FavoritesAdmin.jsx"></script>
+  <script type="text/babel" src="src/components/ExportAdmin.jsx"></script>
   <script type="text/babel" src="src/components/AdminApp.jsx"></script>
   <script type="text/babel" src="src/main.jsx"></script>
 </body>
