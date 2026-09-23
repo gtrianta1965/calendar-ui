@@ -55,6 +55,11 @@ button.danger, a.button.danger { color: var(--danger); }
 .user-list .user-dot { margin-left: 0; }
 .user-list .inactive { font-weight: 400; font-style: italic; }
 .user-list .me { color: var(--text); font-weight: 600; }
+.user-list .select-all {
+  background: none; border: none; padding: 0; font: inherit; color: var(--accent);
+  cursor: pointer; text-decoration: underline;
+}
+.user-list .select-all:hover { color: #0747a6; }
 
 /* Calendar grid */
 .grid {

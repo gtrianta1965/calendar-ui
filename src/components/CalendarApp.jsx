@@ -25,6 +25,9 @@ function CalendarApp({ user, profile, users, onLogout }) {
   });
   React.useEffect(() => { saveView({ year, month, selected, shown }); }, [year, month, selected, shown]);
   const toggleShown = (id) => setShown((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
+  // "Select All" turns into "Deselect All" once every listed user is already checked.
+  const allShown = listedUsers.length > 0 && listedUsers.every((u) => shown.includes(u.id));
+  const toggleAllShown = () => setShown(allShown ? [] : listedUsers.map((u) => u.id));
   const [confirmingClear, setConfirmingClear] = React.useState(false);
   const [clearError, setClearError] = React.useState("");
   const catalog = useProjects();                     // the customer-project choices, from the API
@@ -123,7 +126,7 @@ function CalendarApp({ user, profile, users, onLogout }) {
         canClear
         onLogout={onLogout}
       />
-      <UserList users={listedUsers} meId={profile.id} shown={shown} onToggle={toggleShown} />
+      <UserList users={listedUsers} meId={profile.id} shown={shown} onToggle={toggleShown} allShown={allShown} onToggleAll={toggleAllShown} />
       {shown.length === 0 && (
         <p className="muted banner">No user is checked, so no entries are shown.</p>
       )}
