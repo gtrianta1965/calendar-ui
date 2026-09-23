@@ -5,6 +5,10 @@
 // Administrators are not listed: they do not keep entries for themselves, they add, edit and delete the entries of
 // other users. So the list of users (the check boxes) and the User dropdown of the form leave them out, and a signed-in
 // administrator starts with nobody checked and chooses whose entries to work with.
+//
+// `layout` picks how the same entries are drawn: CalendarGrid (a day grid, editable, drag-and-drop) or MonthPivot
+// (dates down the left, the checked users across the top, read-only) - no new data for either, both read the
+// same `entries`. EntryPanel below always shows the selected date, whichever layout selected it.
 function CalendarApp({ user, profile, users, onLogout }) {
   const now = new Date();
   const isAdmin = profile.role === "admin";
@@ -16,6 +20,7 @@ function CalendarApp({ user, profile, users, onLogout }) {
   const [year, setYear] = React.useState(saved ? saved.year : now.getFullYear());
   const [month, setMonth] = React.useState(saved ? saved.month : now.getMonth());
   const [selected, setSelected] = React.useState(saved ? saved.selected : null);
+  const [layout, setLayout] = React.useState(saved ? saved.layout : "calendar");   // "calendar" or "pivot"
   // The checked users (their ids). At first only the signed-in user (nobody for an administrator, who is not listed);
   // after a reload, as they were left.
   const [shown, setShown] = React.useState(() => {
@@ -23,7 +28,7 @@ function CalendarApp({ user, profile, users, onLogout }) {
     const kept = saved && saved.shown ? saved.shown.filter((id) => listed.has(id)) : null;
     return kept && (kept.length > 0 || saved.shown.length === 0) ? kept : isAdmin ? [] : [profile.id];
   });
-  React.useEffect(() => { saveView({ year, month, selected, shown }); }, [year, month, selected, shown]);
+  React.useEffect(() => { saveView({ year, month, selected, shown, layout }); }, [year, month, selected, shown, layout]);
   const toggleShown = (id) => setShown((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
   // "Select All" turns into "Deselect All" once every listed user is already checked.
   const allShown = listedUsers.length > 0 && listedUsers.every((u) => shown.includes(u.id));
@@ -111,6 +116,13 @@ function CalendarApp({ user, profile, users, onLogout }) {
     return result;
   };
 
+  // The pivot's columns: the checked users, in the same order as their checkboxes in UserList, each with what
+  // MonthPivot needs to draw a header and color its cells.
+  const pivotColumns = React.useMemo(
+    () => listedUsers.filter((u) => shown.includes(u.id)).map((u) => ({ id: u.id, label: u.full_name || u.username, color: u.color })),
+    [listedUsers, shown]
+  );
+
   return (
     <div className="app">
       <Header
@@ -127,6 +139,8 @@ function CalendarApp({ user, profile, users, onLogout }) {
         onNext={() => changeMonth(1)}
         onRefresh={refresh}
         refreshing={entriesState.status === "loading"}
+        layout={layout}
+        onLayoutChange={setLayout}
       />
       <UserList users={listedUsers} meId={profile.id} shown={shown} onToggle={toggleShown} allShown={allShown} onToggleAll={toggleAllShown} />
       {shown.length === 0 && (
@@ -165,16 +179,28 @@ function CalendarApp({ user, profile, users, onLogout }) {
         activeUserIdOf={activeUserIdOf}
         onImported={entriesState.reload}
       />
-      <CalendarGrid
-        year={year}
-        month={month}
-        entries={entries}
-        userOf={userOf}
-        selected={selected}
-        todayKey={todayKey}
-        onSelect={setSelected}
-        onMove={move}
-      />
+      {layout === "pivot" ? (
+        <MonthPivot
+          year={year}
+          month={month}
+          entries={entries}
+          columns={pivotColumns}
+          selected={selected}
+          todayKey={todayKey}
+          onSelect={setSelected}
+        />
+      ) : (
+        <CalendarGrid
+          year={year}
+          month={month}
+          entries={entries}
+          userOf={userOf}
+          selected={selected}
+          todayKey={todayKey}
+          onSelect={setSelected}
+          onMove={move}
+        />
+      )}
       <EntryPanel
         dateKey={selected}
         owners={owners}

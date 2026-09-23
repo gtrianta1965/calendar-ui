@@ -184,3 +184,42 @@ button.danger-solid:hover { background: #a32a21; }
 .banner { margin: 0 0 12px; }
 .banner button { margin-left: 6px; }
 .import-banner { color: var(--text); background: var(--accent-soft); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-size: .9rem; }
+
+/* Calendar/Pivot switch, in the toolbar next to Refresh. */
+.layout-switch { display: flex; gap: 2px; border: 1px solid var(--border); border-radius: 6px; padding: 2px; }
+.layout-switch button { border: none; background: transparent; padding: 5px 12px; border-radius: 4px; font-size: .85rem; }
+.layout-switch button:hover { background: var(--accent-soft); }
+.layout-switch button.active { background: var(--accent); color: #fff; }
+
+/* Pivot layout (MonthPivot): a read-only alternative to the day grid, dates down the left, resources across the
+   top. An entry is tinted in its owner's color the same way .entry is in the day grid, so the two layouts read
+   as the same data, just reshaped. */
+/* max-height + overflow (not just overflow-x) so the header row has something to stay pinned against as the
+   body scrolls - a full month can be much taller than the screen, especially with several resource columns.
+   border-collapse: separate (not collapse) is required here, not just a style choice: position: sticky on a
+   th/td silently does nothing in a border-collapse: collapse table (a real, long-standing browser limitation) -
+   confirmed by testing collapse first and watching the header scroll away instead of staying pinned. */
+.pivot-scroll { overflow: auto; max-height: 65vh; border: 1px solid var(--border); border-radius: 8px; }
+.pivot { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); }
+.pivot th, .pivot td { border-bottom: 1px solid var(--border); padding: 6px 10px; vertical-align: top; text-align: left; }
+.pivot thead th {
+  background: #ebecf0; font-size: .8rem; font-weight: 600; color: var(--muted); white-space: nowrap;
+  position: sticky; top: 0; z-index: 1; box-shadow: inset 0 -1px 0 var(--border);
+}
+.pivot-date-head { min-width: 4em; }
+.pivot-date { font-weight: 600; font-size: .85rem; white-space: nowrap; background: var(--surface); }
+.pivot-row { cursor: pointer; }
+.pivot-row:hover td, .pivot-row:hover th.pivot-date { background: var(--accent-soft); }
+.pivot-row.today td, .pivot-row.today th.pivot-date { background: var(--today); }
+.pivot-row.selected th.pivot-date { box-shadow: inset 3px 0 0 var(--accent); }
+.pivot td { min-width: 10em; }
+.pivot-entry {
+  font-size: .8rem; background: color-mix(in srgb, var(--user-color, var(--accent)) 16%, #fff);
+  border-left: 3px solid var(--user-color, var(--accent)); border-radius: 3px; padding: 2px 6px; margin-bottom: 3px;
+}
+.pivot-entry:last-child { margin-bottom: 0; }
+
+@media (max-width: 640px) {
+  .pivot th, .pivot td { padding: 5px 8px; }
+  .pivot-entry { font-size: .72rem; }
+}
