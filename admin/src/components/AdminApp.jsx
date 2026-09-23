@@ -77,6 +77,9 @@ function AdminApp() {
           Signed in as <strong>{session.full_name || session.username}</strong>
           <span className="role"> (admin)</span>
         </span>
+        <a className="button" href="../index.html" title="Back to the calendar">
+          Calendar
+        </a>
         <button onClick={logout}>Log out</button>
       </div>
       <nav className="tabs">
