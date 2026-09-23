@@ -1,7 +1,8 @@
-// Projects on the left, everyone on the right: pick a project and its checkbox column shows who already has it
-// as a favorite, checked or unchecked to add or remove it for that person. One GET (favorites/all) loads
-// everyone's favorites up front, so picking a different project needs no extra request - only a checkbox
-// toggle does, and only for the row that changed.
+// Projects on the left, every non-admin user on the right: pick a project and its checkbox column shows who
+// already has it as a favorite, checked or unchecked to add or remove it for that person. Administrators are
+// left out (favorites are only ever a regular user's, the same reason UserList leaves them out of the calendar's
+// own checkbox row). One GET (favorites/all) loads everyone's favorites up front, so picking a different project
+// needs no extra request - only a checkbox toggle does, and only for the row that changed.
 function FavoritesAdmin() {
   const [state, setState] = React.useState({ status: "loading", error: "", projects: [], users: [], favorites: [] });
   const [selected, setSelected] = React.useState(null);   // a project id, or null before anything is picked
@@ -21,6 +22,10 @@ function FavoritesAdmin() {
   }, []);
 
   React.useEffect(() => { load(); }, [load]);
+
+  // Administrators keep no favorites of their own (they add entries for other users, not themselves - see
+  // CalendarApp.jsx), so they never appear in the right-hand column, the same way UserList leaves them out.
+  const favoritableUsers = React.useMemo(() => state.users.filter((u) => u.role !== "admin"), [state.users]);
 
   // project id -> Set of user ids who have it favorited, worked out once whenever the favorites list changes.
   const favoritesByProject = React.useMemo(() => {
@@ -83,7 +88,7 @@ function FavoritesAdmin() {
         <div className="favorites-pane">
           <h3>{selectedProject ? <>Favorited by &mdash; <em>{selectedProject.label}</em></> : "Pick a project"}</h3>
           <ul className="favorites-list">
-            {state.users.map((u) => {
+            {favoritableUsers.map((u) => {
               const key = `${selected}:${u.id}`;
               return (
                 <li key={u.id}>
@@ -96,7 +101,6 @@ function FavoritesAdmin() {
                     />
                     <span className="user-dot" style={{ background: u.color }} />
                     {u.full_name || u.username}
-                    {u.role === "admin" && <span className="muted-cell"> (admin)</span>}
                     {!u.is_active && <span className="muted-cell"> (inactive)</span>}
                   </label>
                 </li>
