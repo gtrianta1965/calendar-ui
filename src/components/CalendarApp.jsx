@@ -62,7 +62,8 @@ function CalendarApp({ user, profile, users, onLogout }) {
     return [grid[0].key, grid[grid.length - 1].key];
   }, [year, month]);
   const entriesState = useEntries({ from, to, userIds: shown, projectIdOf, userIdOf });
-  const { addEntry, updateEntry, removeEntry, clearAll } = entriesState;
+  const { addEntry, updateEntry, moveEntry, removeEntry, clearAll } = entriesState;
+  const [moveError, setMoveError] = React.useState("");
   // Only the checked users' entries are shown: also right after an entry is added or moved to someone unchecked.
   const isShown = (username) => shown.includes(userIdOf(username));
   const entries = React.useMemo(() => {
@@ -97,6 +98,14 @@ function CalendarApp({ user, profile, users, onLogout }) {
     setClearError(result.ok ? "" : `Clear data failed: ${result.error}`);
     setSelected(null);
     setConfirmingClear(false);
+  };
+
+  const move = async (date, id, targetDate) => {
+    setMoveError("");
+    const result = await moveEntry(date, id, targetDate);
+    if (!result.ok) setMoveError(`Move failed: ${result.error}`);
+    else setSelected(targetDate);
+    return result;
   };
 
   return (
@@ -140,6 +149,11 @@ function CalendarApp({ user, profile, users, onLogout }) {
           {clearError} <button onClick={() => setClearError("")}>Dismiss</button>
         </p>
       )}
+      {moveError && (
+        <p className="auth-error banner" role="alert">
+          {moveError} <button onClick={() => setMoveError("")}>Dismiss</button>
+        </p>
+      )}
       <ImportBanner
         ready={catalog.status === "ready"}
         projectIdOf={projectIdOf}
@@ -154,6 +168,7 @@ function CalendarApp({ user, profile, users, onLogout }) {
         selected={selected}
         todayKey={todayKey}
         onSelect={setSelected}
+        onMove={move}
       />
       <EntryPanel
         dateKey={selected}

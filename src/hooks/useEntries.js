@@ -120,6 +120,13 @@ function useEntries({ from, to, userIds, projectIdOf, userIdOf }) {
     setState((s) => ({ ...s, entries: withEntry(s.entries, id, updated) }));
   });
 
+  const moveEntry = (date, id, targetDate) => attempt(async () => {
+    const existing = (state.entries[date] || []).find((e) => e.id === id);
+    if (!existing) throw new Error("This entry no longer exists.");
+    const updated = toUiEntry(await apiUpdateEntry(id, { entry_date: targetDate }));
+    setState((s) => ({ ...s, entries: withEntry(s.entries, id, updated) }));
+  });
+
   const removeEntry = (date, id) => attempt(async () => {
     try {
       await apiDeleteEntry(id);
@@ -135,5 +142,5 @@ function useEntries({ from, to, userIds, projectIdOf, userIdOf }) {
     await load();
   });
 
-  return { ...state, reload: load, addEntry, updateEntry, removeEntry, clearAll };
+  return { ...state, reload: load, addEntry, updateEntry, moveEntry, removeEntry, clearAll };
 }
