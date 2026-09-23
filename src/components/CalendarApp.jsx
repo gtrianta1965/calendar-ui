@@ -71,7 +71,7 @@ function CalendarApp({ user, profile, users, onLogout }) {
   }, [year, month]);
   const entriesState = useEntries({ from, to, userIds: shown, projectIdOf, userIdOf });
   const { addEntry, updateEntry, moveEntry, removeEntry, clearAll } = entriesState;
-  const [moveError, setMoveError] = React.useState("");
+  const [dragError, setDragError] = React.useState("");   // a move or a Shift-copy that failed
   // Only the checked users' entries are shown: also right after an entry is added or moved to someone unchecked.
   const isShown = (username) => shown.includes(userIdOf(username));
   const entries = React.useMemo(() => {
@@ -109,9 +109,20 @@ function CalendarApp({ user, profile, users, onLogout }) {
   };
 
   const move = async (date, id, targetDate) => {
-    setMoveError("");
+    setDragError("");
     const result = await moveEntry(date, id, targetDate);
-    if (!result.ok) setMoveError(`Move failed: ${result.error}`);
+    if (!result.ok) setDragError(`Move failed: ${result.error}`);
+    else setSelected(targetDate);
+    return result;
+  };
+
+  // Shift-drag: adds a new entry at the target date with the dragged entry's own project, hours, owner, type and
+  // note, and leaves the original entry at the source date untouched - CalendarGrid already holds the whole
+  // dragged entry (not just its id), so nothing needs to be looked up again here.
+  const copy = async (entry, targetDate) => {
+    setDragError("");
+    const result = await addEntry(targetDate, { project: entry.project, hours: entry.hours, user: entry.user, type: entry.type, note: entry.note });
+    if (!result.ok) setDragError(`Copy failed: ${result.error}`);
     else setSelected(targetDate);
     return result;
   };
@@ -168,9 +179,9 @@ function CalendarApp({ user, profile, users, onLogout }) {
           {clearError} <button onClick={() => setClearError("")}>Dismiss</button>
         </p>
       )}
-      {moveError && (
+      {dragError && (
         <p className="auth-error banner" role="alert">
-          {moveError} <button onClick={() => setMoveError("")}>Dismiss</button>
+          {dragError} <button onClick={() => setDragError("")}>Dismiss</button>
         </p>
       )}
       <ImportBanner
@@ -199,6 +210,7 @@ function CalendarApp({ user, profile, users, onLogout }) {
           todayKey={todayKey}
           onSelect={setSelected}
           onMove={move}
+          onCopy={copy}
         />
       )}
       <EntryPanel

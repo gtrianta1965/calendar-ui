@@ -12,7 +12,7 @@ function DayCell({ day, monthLabel, entries, userOf, isOutside, isToday, isSelec
         return (
           <div key={e.id} className="entry" draggable onDragStart={(event) => onDragStart(event, e)} onDragEnd={onDragEnd}
                style={{ "--user-color": owner && owner.color }}
-               title={`${formatEntry(e)} (${owner ? owner.label : e.user})`}>
+               title={`${formatEntry(e)} (${owner ? owner.label : e.user}) - drag to move, Shift+drag to copy`}>
             {formatEntry(e)}
           </div>
         );
