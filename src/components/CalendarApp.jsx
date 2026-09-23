@@ -114,17 +114,19 @@ function CalendarApp({ user, profile, users, onLogout }) {
   return (
     <div className="app">
       <Header
+        profile={profile}
+        onClear={() => setConfirmingClear(true)}
+        canClear
+        onLogout={onLogout}
+      />
+      <CalendarToolbar
         year={year}
         month={month}
-        profile={profile}
         onPrev={() => changeMonth(-1)}
         onToday={goToday}
         onNext={() => changeMonth(1)}
         onRefresh={refresh}
         refreshing={entriesState.status === "loading"}
-        onClear={() => setConfirmingClear(true)}
-        canClear
-        onLogout={onLogout}
       />
       <UserList users={listedUsers} meId={profile.id} shown={shown} onToggle={toggleShown} allShown={allShown} onToggleAll={toggleAllShown} />
       {shown.length === 0 && (

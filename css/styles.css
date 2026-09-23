@@ -42,8 +42,11 @@ button.primary:hover, a.button.primary:hover { background: #0747a6; }
 button.danger, a.button.danger { color: var(--danger); }
 
 /* Header */
-.header { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-.header h1 { flex: 1 1 auto; margin: 0; font-size: 1.5rem; }
+/* .header: session-level chrome (rare actions). .toolbar: the month and its navigation (frequent actions),
+   right above the grid - same row layout as .header, one level down in visual weight. */
+.header, .toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.header h1 { flex: 1 1 auto; margin: 0; font-size: 1.1rem; color: var(--muted); font-weight: 600; }
+.toolbar h2 { flex: 1 1 auto; margin: 0; font-size: 1.5rem; }
 .header .user { color: var(--muted); font-size: .9rem; }
 .user-dot { display: inline-block; width: .7em; height: .7em; border-radius: 50%; margin: 0 .35em 0 .2em; }
 
