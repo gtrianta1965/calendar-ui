@@ -219,6 +219,7 @@ button.danger-solid:hover { background: #a32a21; }
   border-left: 3px solid var(--user-color, var(--accent)); border-radius: 3px; padding: 2px 6px; margin-bottom: 3px;
 }
 .pivot-entry:last-child { margin-bottom: 0; }
+.pivot-entry.actual { font-weight: 700; }
 
 @media (max-width: 640px) {
   .pivot th, .pivot td { padding: 5px 8px; }

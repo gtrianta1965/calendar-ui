@@ -37,7 +37,7 @@ function MonthPivot({ year, month, entries, columns, selected, todayKey, onSelec
                   return (
                     <td key={u.id} style={{ "--user-color": u.color }}>
                       {cellEntries.map((e) => (
-                        <div key={e.id} className="pivot-entry" title={formatEntry(e)}>{formatEntry(e)}</div>
+                        <div key={e.id} className={`pivot-entry${e.type === "actual" ? " actual" : ""}`} title={formatEntry(e)}>{formatEntry(e)}</div>
                       ))}
                     </td>
                   );
