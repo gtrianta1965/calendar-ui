@@ -10,7 +10,7 @@ function DayCell({ day, monthLabel, entries, userOf, isOutside, isToday, isSelec
       {entries.map((e) => {
         const owner = userOf(e.user);
         return (
-          <div key={e.id} className="entry" draggable onDragStart={(event) => onDragStart(event, e)} onDragEnd={onDragEnd}
+          <div key={e.id} className={`entry${e.type === "actual" ? " actual" : ""}`} draggable onDragStart={(event) => onDragStart(event, e)} onDragEnd={onDragEnd}
                style={{ "--user-color": owner && owner.color }}
                title={`${formatEntry(e)} (${owner ? owner.label : e.user}) - drag to move, Shift+drag to copy`}>
             {formatEntry(e)}

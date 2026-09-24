@@ -107,6 +107,7 @@ button.danger, a.button.danger { color: var(--danger); }
   cursor: grab;
 }
 .entry:active { cursor: grabbing; }
+.entry.actual { font-weight: 700; }
 
 /* Entry panel */
 .panel {
