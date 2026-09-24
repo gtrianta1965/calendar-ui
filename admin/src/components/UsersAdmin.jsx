@@ -6,6 +6,9 @@
 // this screen just shows that message back, it does not try to predict it).
 function UsersAdmin({ reloadToken }) {
   const [state, setState] = React.useState({ rows: [], status: "loading", error: "" });
+  const technologyGroupOptions = TECHNOLOGY_GROUP_LIST.split("|")
+    .filter(Boolean)
+    .map((value) => ({ value, label: value }));
 
   const load = React.useCallback(async () => {
     setState((s) => ({ ...s, status: "loading" }));
@@ -23,6 +26,7 @@ function UsersAdmin({ reloadToken }) {
     { key: "full_name", label: "Full name", type: "text" },
     { key: "email", label: "Email", type: "email" },
     { key: "role", label: "Role", type: "select", options: [{ value: "user", label: "User" }, { value: "admin", label: "Administrator" }] },
+    { key: "technology_group", label: "Technology group", type: "select", options: technologyGroupOptions, parse: (value) => value || null },
     { key: "is_active", label: "Status", type: "checkbox", omitOnCreate: true },
     { key: "color", label: "Color", type: "color" },
     { key: "password", label: "Password", type: "password", editOnly: true, required: true },

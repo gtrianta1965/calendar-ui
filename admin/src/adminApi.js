@@ -7,7 +7,7 @@
 // ---- users (all fields, not the trimmed /users/directory the main app uses)
 const apiAdminListUsers = () => apiRequest("/users");
 const apiAdminCreateUser = (body) => apiRequest("/users", { method: "POST", body });
-// `changes` holds only the fields that change: full_name, email, role, is_active, password, color.
+// `changes` holds only the fields that change: full_name, email, role, technology_group, is_active, password, color.
 const apiAdminUpdateUser = (id, changes) => apiRequest(`/users/${id}`, { method: "PATCH", body: changes });
 
 // ---- customers (include_inactive=true so retired ones are still visible and can be reactivated)
