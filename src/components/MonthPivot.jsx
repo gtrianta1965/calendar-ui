@@ -27,11 +27,12 @@ function MonthPivot({ year, month, entries, columns, selected, todayKey, onSelec
         <tbody>
           {days.map((day) => {
             const key = dateKey(year, month, day);
+            const weekday = DAYS[(new Date(year, month, day).getDay() + 6) % 7];
             const dayEntries = entries[key] || [];
             const cls = ["pivot-row", key === todayKey && "today", key === selected && "selected"].filter(Boolean).join(" ");
             return (
               <tr key={key} className={cls} onClick={() => onSelect(key)}>
-                <th scope="row" className="pivot-date">{day}</th>
+                <th scope="row" className="pivot-date">{weekday} {day}</th>
                 {columns.map((u) => {
                   const cellEntries = dayEntries.filter((e) => e.userId === u.id);
                   return (
