@@ -8,6 +8,9 @@
   --accent-soft: #e6effc;
   --today: #fff4d6;
   --danger: #c9372c;
+  --holiday-bg: #ececec;
+  --holiday-banner-bg: #d0d0d0;
+  --weekend-bg: #f2f3f5;
 }
 * { box-sizing: border-box; }
 body {
@@ -84,9 +87,19 @@ button.danger, a.button.danger { color: var(--danger); }
 .cell.outside { background: #f7f8fa; }
 .cell.outside:hover { background: var(--accent-soft); }
 .cell.outside:not(.today) .num { color: var(--muted); font-weight: 500; }
+/* Just a visual cue - weekends are ordinary days otherwise (an actual entry there is nothing exceptional).
+   Comes after .outside so it wins there too, but before .today so an actual today's highlight still wins. */
+.cell.weekend { background: var(--weekend-bg); }
 .cell.today { background: var(--today); }
 .cell.selected { outline: 2px solid var(--accent); outline-offset: -2px; }
 .cell.drop-target { outline: 2px dashed var(--accent); outline-offset: -2px; background: var(--accent-soft); }
+/* Comes after .cell:hover/.outside/.today above so a holiday's grey wins over them (same equal-specificity,
+   later-wins pattern .today already relies on), but .selected/.drop-target still show through via outline. */
+.cell.holiday { background: var(--holiday-bg); }
+.holiday-banner {
+  margin: -6px -6px 0; padding: 3px 6px; background: var(--holiday-banner-bg); color: var(--text);
+  font-weight: 700; font-size: .72rem; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .num { font-size: .85rem; font-weight: 600; }
 .today .num {
   background: var(--accent); color: #fff; border-radius: 50%;
@@ -211,8 +224,17 @@ button.danger-solid:hover { background: #a32a21; }
 .pivot-date { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; font-size: .85rem; white-space: nowrap; background: var(--surface); }
 .pivot-row { cursor: pointer; }
 .pivot-row:hover td, .pivot-row:hover th.pivot-date { background: var(--accent-soft); }
+/* Just a visual cue, same as CalendarGrid's .cell.weekend - before .today so an actual today's highlight wins. */
+.pivot-row.weekend td, .pivot-row.weekend th.pivot-date { background: var(--weekend-bg); }
 .pivot-row.today td, .pivot-row.today th.pivot-date { background: var(--today); }
+/* After .today so a holiday's grey wins, the same precedence CalendarGrid's .cell.holiday relies on. */
+.pivot-row.holiday td, .pivot-row.holiday th.pivot-date { background: var(--holiday-bg); }
 .pivot-row.selected th.pivot-date { box-shadow: inset 3px 0 0 var(--accent); }
+.pivot-holiday-row { cursor: pointer; }
+.pivot-holiday-banner {
+  background: var(--holiday-banner-bg); color: var(--text); font-weight: 700; font-size: .8rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .pivot td { min-width: 10em; }
 .pivot-entry {
   font-size: .8rem; background: color-mix(in srgb, var(--user-color, var(--accent)) 16%, #fff);

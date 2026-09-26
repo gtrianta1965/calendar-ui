@@ -1,15 +1,23 @@
 // Auth gate: the login page until someone is signed in, then their calendar.
 // Signing in and the list of users both come from the API.
 function App() {
-  const [session, setSession] = React.useState(null);              // { user, users } once signed in
+  const [session, setSession] = React.useState(null);              // { user, users, settings } once signed in
   const [checking, setChecking] = React.useState(() => !!getToken()); // a token from this tab is being checked
   const [notice, setNotice] = React.useState("");                  // why the login page is showing, if not just "signed out"
 
-  const start = (user, users) => {
+  const start = (user, users, settings) => {
     // Entries saved before accounts existed have no owner: the first user in the list adopts them.
     if (users.length && user.id === Math.min(...users.map((u) => u.id))) adoptLegacyEntries(user.username);
     setNotice("");
-    setSession({ user, users });
+    setSession({ user, users, settings });
+  };
+
+  const loadSettings = async () => {
+    try {
+      return await apiSettings();
+    } catch (e) {
+      return { restrict_user_to_actuals: RESTRICT_USER_TO_ACTUALS };
+    }
   };
 
   // A page reload keeps the tab's token: check it with the API, and get the user list.
@@ -25,7 +33,8 @@ function App() {
       try {
         const user = await restoreSession();
         const users = await loadUsers();
-        if (!cancelled && user) start(user, users);
+        const settings = await loadSettings();
+        if (!cancelled && user) start(user, users, settings);
       } catch (e) {
         if (!cancelled && e.status !== 401) setNotice(e.message); // a 401 already said "session ended"
       } finally {
@@ -40,7 +49,7 @@ function App() {
     const result = await loginUser(username, password);
     if (!result.ok) return result.error;
     clearView();                                    // a new sign-in starts on today's month
-    start(result.user, await loadUsers());
+    start(result.user, await loadUsers(), await loadSettings());
     return null;
   };
 
@@ -63,6 +72,7 @@ function App() {
         user={session.user.username}
         profile={session.user}
         users={session.users}
+        settings={session.settings}
         onLogout={logout}
       />
       <StatusBar />

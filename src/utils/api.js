@@ -83,9 +83,13 @@ async function apiLogin(username, password) {
 }
 
 const apiMe = () => apiRequest("/auth/me");
+const apiSettings = () => apiRequest("/settings", { auth: false });
 
 // Everyone's id, username, full_name, color and is_active (nothing private). Open to any signed-in user.
 const apiUsers = () => apiRequest("/users/directory");
+
+// Public holidays, by country: GET is open to any signed-in user; POST (admin-only) lives in admin/src/adminApi.js.
+const apiPublicHolidays = () => apiRequest("/public-holidays");
 
 // The customer-project choices for the entry form: active projects, one user's favorites first (the signed-in
 // user's by default, or forUserId's when given, so the list reflects whoever the entry is being made for).

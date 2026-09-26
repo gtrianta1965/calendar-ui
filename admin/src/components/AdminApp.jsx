@@ -67,6 +67,7 @@ function AdminApp() {
     { id: "customers", label: "Customers" },
     { id: "projects", label: "Projects" },
     { id: "favorites", label: "Favorites" },
+    { id: "holidays", label: "Public Holidays" },
     { id: "export", label: "Export" },
   ];
 
@@ -92,6 +93,7 @@ function AdminApp() {
       {tab === "customers" && <CustomersAdmin onChanged={() => setCustomersVersion((v) => v + 1)} />}
       {tab === "projects" && <ProjectsAdmin customersVersion={customersVersion} />}
       {tab === "favorites" && <FavoritesAdmin />}
+      {tab === "holidays" && <PublicHolidaysAdmin />}
       {tab === "export" && <ExportAdmin />}
       <StatusBar />
     </div>

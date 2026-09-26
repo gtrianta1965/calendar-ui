@@ -9,7 +9,7 @@
 // `layout` picks how the same entries are drawn: CalendarGrid (a day grid, editable, drag-and-drop) or MonthPivot
 // (dates down the left, the checked users across the top, read-only) - no new data for either, both read the
 // same `entries`. EntryPanel below always shows the selected date, whichever layout selected it.
-function CalendarApp({ user, profile, users, onLogout }) {
+function CalendarApp({ user, profile, users, settings, onLogout }) {
   const now = new Date();
   const isAdmin = profile.role === "admin";
   const listedUsers = React.useMemo(() => users.filter((u) => u.role !== "admin"), [users]);
@@ -36,6 +36,7 @@ function CalendarApp({ user, profile, users, onLogout }) {
   const [confirmingClear, setConfirmingClear] = React.useState(false);
   const [clearError, setClearError] = React.useState("");
   const catalog = useProjects();                     // the customer-project choices, from the API
+  const holidays = useHolidays();                    // public holidays, by date
 
   // Who an entry belongs to, from the user directory (the signed-in user's own record is a fallback):
   // { id, username, label, color, active }, where label is the full name or else the username.
@@ -169,6 +170,12 @@ function CalendarApp({ user, profile, users, onLogout }) {
           <button onClick={entriesState.reload}>Retry</button>
         </p>
       )}
+      {holidays.status === "error" && (
+        <p className="auth-error banner" role="alert">
+          Public holidays could not be loaded: {holidays.error}{" "}
+          <button onClick={holidays.reload}>Retry</button>
+        </p>
+      )}
       {entriesState.truncated && (
         <p className="auth-error banner" role="alert">
           Only the first {ENTRIES_LIMIT} entries of these dates are shown.
@@ -195,6 +202,7 @@ function CalendarApp({ user, profile, users, onLogout }) {
           year={year}
           month={month}
           entries={entries}
+          holidays={holidays.byDate}
           columns={pivotColumns}
           selected={selected}
           todayKey={todayKey}
@@ -206,6 +214,7 @@ function CalendarApp({ user, profile, users, onLogout }) {
           month={month}
           entries={entries}
           userOf={userOf}
+          holidays={holidays.byDate}
           selected={selected}
           todayKey={todayKey}
           onSelect={setSelected}
@@ -217,6 +226,8 @@ function CalendarApp({ user, profile, users, onLogout }) {
         dateKey={selected}
         owners={owners}
         currentUser={user}
+        isAdmin={isAdmin}
+        restrictUserToActuals={settings.restrict_user_to_actuals !== false}
         userOf={userOf}
         isShown={isShown}
         entries={selected ? entries[selected] || [] : []}

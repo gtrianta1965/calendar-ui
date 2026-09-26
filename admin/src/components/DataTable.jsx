@@ -4,7 +4,7 @@
 // that history stays attributable.
 //
 // columns: [{ key, label, type, options?, display?, parse?, required?, editOnly?, immutableAfterCreate? }]
-//   type: "text" | "email" | "password" | "select" | "checkbox" | "color" | "readonly"
+//   type: "text" | "email" | "password" | "select" | "checkbox" | "color" | "date" | "readonly"
 //   options: [{ value, label }], for type "select"
 //   display(row): a custom read-mode AND edit-mode renderer (falls back to a type-appropriate default)
 //   parse(value): converts the input's string value before it is sent (for example customer_id -> Number)
@@ -14,8 +14,9 @@
 //     the API has no rename)
 //
 // rows: the records, each with idKey (default "id"). newDefaults: starting values for the "Add" row.
-// onCreate(values) / onUpdate(id, changes): async, resolve with { ok: true } or { ok: false, error }, the
-// same convention the rest of the app uses (see EntryPanel's onAdd/onUpdate).
+// onCreate(values): async, resolves with { ok: true } or { ok: false, error }, the same convention the rest
+// of the app uses (see EntryPanel's onAdd/onUpdate). onUpdate(id, changes): same convention; omit it entirely
+// for an insert-only table (no PATCH/DELETE) - the "Edit" button then never appears, so it is never called.
 function DataTable({ title, columns, rows, idKey = "id", newDefaults = {}, onCreate, onUpdate, addLabel }) {
   const [editingId, setEditingId] = React.useState(null); // null | "new" | a row's id
   const [draft, setDraft] = React.useState({});
@@ -110,6 +111,9 @@ function DataTable({ title, columns, rows, idKey = "id", newDefaults = {}, onCre
         </span>
       );
     }
+    if (c.type === "date") {
+      return <input type="date" value={value ?? ""} onChange={(e) => setField(c.key, e.target.value)} />;
+    }
     if (c.type === "password") {
       return (
         <input
@@ -190,7 +194,7 @@ function DataTable({ title, columns, rows, idKey = "id", newDefaults = {}, onCre
               editingId === row[idKey] ? editRow(row) : (
                 <tr key={row[idKey]}>
                   {visible.map((c) => <td key={c.key}>{shownValue(row, c)}</td>)}
-                  <td className="actions"><button onClick={() => startEdit(row)}>Edit</button></td>
+                  <td className="actions">{onUpdate && <button onClick={() => startEdit(row)}>Edit</button>}</td>
                 </tr>
               )
             ))}

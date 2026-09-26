@@ -40,6 +40,9 @@ const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => (i + 1) / 2);
 // Hours preselected when adding a new entry.
 const DEFAULT_HOURS = 8;
 
+// Fallback used before the API settings are loaded. The API settings response is authoritative.
+const RESTRICT_USER_TO_ACTUALS = false;
+
 // Technology groups offered by the administrator's user editor. The trailing separator leaves room for
 // an empty option, which clears an existing assignment because the Oracle column is nullable.
 const TECHNOLOGY_GROUP_LIST = "DBA|MW|SEC|";

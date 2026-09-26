@@ -1,11 +1,12 @@
 // owners: the users an entry can be given to, [{ username, label, color }] (never an administrator); currentUser: the signed-in username;
 // userOf(username): an entry owner's { id, label, color }; isShown(username): whether that user's entries are checked.
 // onAdd, onUpdate and onRemove call the API and resolve with { ok: true } or { ok: false, error }.
-function EntryPanel({ dateKey: selectedKey, owners, currentUser, userOf, isShown, entries, onAdd, onUpdate, onRemove }) {
+function EntryPanel({ dateKey: selectedKey, owners, currentUser, isAdmin, restrictUserToActuals, userOf, isShown, entries, onAdd, onUpdate, onRemove }) {
   // Select values are strings. project "" means nothing chosen yet; hours starts at the default.
   const [project, setProject] = React.useState("");
   const [hours, setHours] = React.useState(String(DEFAULT_HOURS));
-  const [type, setType] = React.useState("forecast");    // a new entry starts as a forecast, not yet worked
+  const canAddForecast = isAdmin || !restrictUserToActuals;
+  const [type, setType] = React.useState(canAddForecast ? "forecast" : "actual");
   const [note, setNote] = React.useState("");             // one line, optional
   // Whose entry: the signed-in user when adding, the entry's own when editing. An administrator is not among the owners
   // (they do not keep entries for themselves), so they must choose one: "" means nobody chosen yet.
@@ -24,7 +25,7 @@ function EntryPanel({ dateKey: selectedKey, owners, currentUser, userOf, isShown
   const catalog = useProjects(ownerId);
 
   const resetEditor = () => {
-    setProject(""); setHours(String(DEFAULT_HOURS)); setType("forecast"); setNote("");
+    setProject(""); setHours(String(DEFAULT_HOURS)); setType(canAddForecast ? "forecast" : "actual"); setNote("");
     setOwner(defaultOwner); setEditingId(null); setFailure(""); setHiddenNote("");
   };
 
@@ -152,7 +153,7 @@ function EntryPanel({ dateKey: selectedKey, owners, currentUser, userOf, isShown
             value={type}
             onChange={(e) => setType(e.target.value)}
           >
-            <option value="forecast">Forecast</option>
+            {canAddForecast && <option value="forecast">Forecast</option>}
             <option value="actual">Actual</option>
           </select>
           <button className="primary" onClick={save} disabled={!canSave || busy}>
