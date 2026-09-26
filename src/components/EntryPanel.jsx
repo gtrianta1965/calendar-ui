@@ -87,6 +87,11 @@ function EntryPanel({ dateKey: selectedKey, owners, currentUser, isAdmin, restri
   const stray = project && !catalog.projects.some((p) => p.label === project) ? project : null;
   // An entry's owner who is not offered (deactivated, or unknown) stays selectable while editing.
   const strayOwner = owner && !owners.some((o) => o.username === owner) ? owner : null;
+  // A restricted user editing an existing forecast entry (an admin can create one for them, bypassing the
+  // actual-only rule on creation): "Forecast" must stay a real option here too, or the select shows "Actual"
+  // (the only option) while `type` is still "forecast" underneath - Save then sees no change and silently
+  // leaves the entry as forecast, even though the user believes they just set it to Actual.
+  const canPickForecast = canAddForecast || type === "forecast";
   const option = (p) => <option key={p.id} value={p.label}>{p.label}</option>;
   const placeholder = catalog.status === "loading" ? "Loading projects…"
     : catalog.status === "error" ? "Projects unavailable" : "Customer - Project…";
@@ -153,7 +158,7 @@ function EntryPanel({ dateKey: selectedKey, owners, currentUser, isAdmin, restri
             value={type}
             onChange={(e) => setType(e.target.value)}
           >
-            {canAddForecast && <option value="forecast">Forecast</option>}
+            {canPickForecast && <option value="forecast">Forecast</option>}
             <option value="actual">Actual</option>
           </select>
           <button className="primary" onClick={save} disabled={!canSave || busy}>
