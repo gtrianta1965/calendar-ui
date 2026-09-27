@@ -17,6 +17,26 @@
 // onCreate(values): async, resolves with { ok: true } or { ok: false, error }, the same convention the rest
 // of the app uses (see EntryPanel's onAdd/onUpdate). onUpdate(id, changes): same convention; omit it entirely
 // for an insert-only table (no PATCH/DELETE) - the "Edit" button then never appears, so it is never called.
+//
+// Edit/Save/Cancel are icons, not text, so the "actions" column stays narrow regardless of how many other
+// columns a table has (see ProjectsAdmin/UsersAdmin, which already scroll horizontally) - title/aria-label
+// carry the same word a screen reader or a tooltip would otherwise get from a text button.
+const IconEdit = () => (
+  <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M13.5 3.5l3 3L6 17H3v-3z" />
+  </svg>
+);
+const IconSave = () => (
+  <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M4 10.5l4 4 8-8.5" />
+  </svg>
+);
+const IconCancel = () => (
+  <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+    <path d="M5 5l10 10M15 5L5 15" />
+  </svg>
+);
+
 function DataTable({ title, columns, rows, idKey = "id", newDefaults = {}, onCreate, onUpdate, addLabel }) {
   const [editingId, setEditingId] = React.useState(null); // null | "new" | a row's id
   const [draft, setDraft] = React.useState({});
@@ -153,8 +173,12 @@ function DataTable({ title, columns, rows, idKey = "id", newDefaults = {}, onCre
       <tr className="editing" key={key}>
         {visible.map((c) => <td key={c.key}>{field(c, row)}</td>)}
         <td className="actions">
-          <button className="primary" onClick={save} disabled={busy}>{busy ? "Saving…" : "Save"}</button>
-          <button onClick={cancel} disabled={busy}>Cancel</button>
+          <button className="primary icon-button" onClick={save} disabled={busy} title="Save" aria-label="Save">
+            {busy ? "…" : <IconSave />}
+          </button>
+          <button className="icon-button" onClick={cancel} disabled={busy} title="Cancel" aria-label="Cancel">
+            <IconCancel />
+          </button>
         </td>
       </tr>,
       editOnlyCols.length > 0 && (
@@ -194,7 +218,13 @@ function DataTable({ title, columns, rows, idKey = "id", newDefaults = {}, onCre
               editingId === row[idKey] ? editRow(row) : (
                 <tr key={row[idKey]}>
                   {visible.map((c) => <td key={c.key}>{shownValue(row, c)}</td>)}
-                  <td className="actions">{onUpdate && <button onClick={() => startEdit(row)}>Edit</button>}</td>
+                  <td className="actions">
+                    {onUpdate && (
+                      <button className="icon-button" onClick={() => startEdit(row)} title="Edit" aria-label="Edit">
+                        <IconEdit />
+                      </button>
+                    )}
+                  </td>
                 </tr>
               )
             ))}
