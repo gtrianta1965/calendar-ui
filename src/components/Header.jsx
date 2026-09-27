@@ -15,7 +15,8 @@ function Header({ profile, onClear, canClear, onLogout }) {
           Admin
         </a>
       )}
-      <button className="danger" onClick={onClear} disabled={!canClear}>Clear data</button>
+      {/* Not used any more - hidden, not removed: onClear/canClear stay wired in case this comes back. */}
+      <button className="danger" onClick={onClear} disabled={!canClear} style={{ display: "none" }}>Clear data</button>
       <button onClick={onLogout}>Log out</button>
     </div>
   );

@@ -43,6 +43,7 @@ button:hover, a.button:hover { background: var(--accent-soft); }
 button.primary, a.button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 button.primary:hover, a.button.primary:hover { background: #0747a6; }
 button.danger, a.button.danger { color: var(--danger); }
+.icon-button { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; }
 
 /* Header */
 /* .header: session-level chrome (rare actions). .toolbar: the month and its navigation (frequent actions),

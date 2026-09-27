@@ -1,3 +1,30 @@
+// Edit/Save/Cancel match the admin console's icon buttons (admin/src/components/DataTable.jsx) exactly, so the
+// same action reads the same way everywhere - Save doubles as "Add" here (this one button does both, unlike
+// DataTable.jsx's separate "+ Add" text button and inline Save); Delete is this panel's own (the admin console
+// never deletes anything - see DataTable.jsx's own comment on that). Duplicated here rather than shared: this
+// page and the admin console are separate HTML entry points with no shared module scope (plain script globals,
+// loaded per page).
+const IconEdit = () => (
+  <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M13.5 3.5l3 3L6 17H3v-3z" />
+  </svg>
+);
+const IconSave = () => (
+  <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M4 10.5l4 4 8-8.5" />
+  </svg>
+);
+const IconCancel = () => (
+  <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+    <path d="M5 5l10 10M15 5L5 15" />
+  </svg>
+);
+const IconDelete = () => (
+  <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M4 6h12M8 6V4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V6M6 6l.8 10.2a1 1 0 0 0 1 .8h4.4a1 1 0 0 0 1-.8L14 6" />
+  </svg>
+);
+
 // owners: the users an entry can be given to, [{ username, label, color }] (never an administrator); currentUser: the signed-in username;
 // userOf(username): an entry owner's { id, label, color }; isShown(username): whether that user's entries are checked.
 // onAdd, onUpdate and onRemove call the API and resolve with { ok: true } or { ok: false, error }.
@@ -112,8 +139,12 @@ function EntryPanel({ dateKey: selectedKey, owners, currentUser, isAdmin, restri
             </span>
             <span className="type">{e.type === "actual" ? "Actual" : "Forecast"}</span>
             <span className="hours">{formatHours(e.hours)}</span>
-            <button onClick={() => startEdit(e)} disabled={busy}>Edit</button>
-            <button className="danger" onClick={() => remove(e.id)} disabled={busy}>Delete</button>
+            <button className="icon-button" onClick={() => startEdit(e)} disabled={busy} title="Edit" aria-label="Edit">
+              <IconEdit />
+            </button>
+            <button className="icon-button danger" onClick={() => remove(e.id)} disabled={busy} title="Delete" aria-label="Delete">
+              <IconDelete />
+            </button>
           </li>
         ))}
       </ul>
@@ -161,10 +192,20 @@ function EntryPanel({ dateKey: selectedKey, owners, currentUser, isAdmin, restri
             {canPickForecast && <option value="forecast">Forecast</option>}
             <option value="actual">Actual</option>
           </select>
-          <button className="primary" onClick={save} disabled={!canSave || busy}>
-            {busy ? "Saving…" : editingId ? "Save" : "Add"}
+          <button
+            className="icon-button primary"
+            onClick={save}
+            disabled={!canSave || busy}
+            title={editingId ? "Save" : "Add"}
+            aria-label={editingId ? "Save" : "Add"}
+          >
+            {busy ? "…" : <IconSave />}
           </button>
-          {editingId && <button onClick={resetEditor} disabled={busy}>Cancel</button>}
+          {editingId && (
+            <button className="icon-button" onClick={resetEditor} disabled={busy} title="Cancel" aria-label="Cancel">
+              <IconCancel />
+            </button>
+          )}
         </div>
         <div className="row note-row">
           <input
