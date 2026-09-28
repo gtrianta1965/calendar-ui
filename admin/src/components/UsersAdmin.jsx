@@ -25,7 +25,7 @@ function UsersAdmin({ reloadToken }) {
     { key: "username", label: "Username", type: "text", required: true, immutableAfterCreate: true },
     { key: "full_name", label: "Full name", type: "text" },
     { key: "email", label: "Email", type: "email" },
-    { key: "role", label: "Role", type: "select", options: [{ value: "user", label: "User" }, { value: "admin", label: "Administrator" }] },
+    { key: "role", label: "Role", type: "select", options: [{ value: "user", label: "User" }, { value: "admin", label: "Administrator" }, { value: "viewer", label: "Viewer" }] },
     { key: "technology_group", label: "Technology group", type: "select", options: technologyGroupOptions, parse: (value) => value || null },
     { key: "is_active", label: "Status", type: "checkbox", omitOnCreate: true },
     { key: "color", label: "Color", type: "color" },

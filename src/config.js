@@ -4,10 +4,10 @@
 // Where the API listens. Sign-in and the list of users come from it. No trailing slash.
 // The API is Oracle REST Data Services (ORDS), the PL/SQL services of ords/ords.sql. It is now the one on the Oracle
 // Autonomous Database (see "The same backend on Oracle Autonomous Database" in ords/ords.md); it answers a page from any origin.
-const API_BASE_URL = "https://sbef1gj6zmj6uhq-dbg30.adb.eu-frankfurt-1.oraclecloudapps.com/ords/gtrianta/calendar";
+//const API_BASE_URL = "https://sbef1gj6zmj6uhq-dbg30.adb.eu-frankfurt-1.oraclecloudapps.com/ords/gtrianta/calendar";
 // The same services on the local Oracle database (start ORDS as described in ords/ords.md); to use it instead,
 // comment the line above and uncomment this one (ORDS accepts pages served from any localhost port):
-// const API_BASE_URL = "http://localhost:8080/ords/gtrianta/calendar";
+ const API_BASE_URL = "http://localhost:8080/ords/gtrianta/calendar";
 // The FastAPI backend (startserver.bat, SQLite) answers exactly the same requests; to use it instead,
 // comment the line above and uncomment this one (see backend/README.md for its CORS settings):
 // const API_BASE_URL = "http://127.0.0.1:8000/api";
