@@ -4,7 +4,7 @@
 function Header({ profile, onClear, canClear, onLogout }) {
   return (
     <div className="header">
-      <h1>Simple Calendar</h1>
+      <h1>Oracle Consulting Calendar</h1>
       <span className="user">
         Signed in as <span className="user-dot" style={{ background: profile.color }} />
         <strong>{profile.full_name || profile.username}</strong>

@@ -13,7 +13,9 @@ function DayCell({ day, monthLabel, entries, userOf, holiday, isWeekend, isOutsi
           {holiday.description} ({holiday.countries})
         </div>
       )}
-      <span className="num">{monthLabel ? `${monthLabel} ${day}` : day}</span>
+      {/* The month prefix is skipped when this is also today's cell: the blue circle below already makes it
+          unmistakable, and "Sep 28" doesn't fit the circle's fixed size the way a bare "28" does. */}
+      <span className="num">{monthLabel && !isToday ? `${monthLabel} ${day}` : day}</span>
       {entries.map((e) => {
         const owner = userOf(e.user);
         return (
