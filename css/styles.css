@@ -54,19 +54,28 @@ button.danger, a.button.danger { color: var(--danger); }
 .header .user { color: var(--muted); font-size: .9rem; }
 .user-dot { display: inline-block; width: .7em; height: .7em; border-radius: 50%; margin: 0 .35em 0 .2em; }
 
-/* Who is in the system: everyone from the API's user directory, in their color */
-.user-list { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0 0 12px; padding: 0; list-style: none; color: var(--muted); font-size: .85rem; }
+/* Who is in the system: everyone from the API's user directory, in their color, one box per technology group */
+.user-groups { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px 12px; margin: 0 0 12px; }
+.user-group {
+  margin: 0; padding: 2px 10px 6px; min-width: 0;
+  border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+}
+.user-group legend { padding: 0 6px; font-size: .75rem; font-weight: 700; letter-spacing: .04em; color: var(--text); }
+.user-group legend label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.user-group legend input { margin: 0; cursor: pointer; }
+.user-groups > .select-all { align-self: center; }
+.user-list { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; padding: 0; list-style: none; color: var(--muted); font-size: .85rem; }
 .user-list li { display: flex; align-items: center; }
 .user-list label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
 .user-list input { margin: 0 2px 0 0; cursor: pointer; }
 .user-list .user-dot { margin-left: 0; }
 .user-list .inactive { font-weight: 400; font-style: italic; }
 .user-list .me { color: var(--text); font-weight: 600; }
-.user-list .select-all {
+.user-groups .select-all {
   background: none; border: none; padding: 0; font: inherit; color: var(--accent);
   cursor: pointer; text-decoration: underline;
 }
-.user-list .select-all:hover { color: #0747a6; }
+.user-groups .select-all:hover { color: #0747a6; }
 
 /* Calendar grid */
 .grid {

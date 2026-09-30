@@ -12,7 +12,12 @@
 function CalendarApp({ user, profile, users, settings, onLogout }) {
   const now = new Date();
   const isAdmin = profile.role === "admin";
-  const listedUsers = React.useMemo(() => users.filter((u) => u.role !== "admin"), [users]);
+  // In the order of the technology-group boxes of UserList (a stable sort: inside a group, the directory's order), so the
+  // pivot's columns and the User dropdown follow the same order as the check boxes.
+  const listedUsers = React.useMemo(
+    () => users.filter((u) => u.role !== "admin").sort((a, b) => techGroupRank(a) - techGroupRank(b)),
+    [users]
+  );
   const todayKey = dateKey(now.getFullYear(), now.getMonth(), now.getDate());
 
   // Start where the user was before a page reload (if they were somewhere), otherwise on today's month.
@@ -30,6 +35,8 @@ function CalendarApp({ user, profile, users, settings, onLogout }) {
   });
   React.useEffect(() => { saveView({ year, month, selected, shown, layout }); }, [year, month, selected, shown, layout]);
   const toggleShown = (id) => setShown((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
+  // A group's checkbox: check (on) or uncheck every one of its users, leaving the other groups as they are.
+  const toggleGroup = (ids, on) => setShown((cur) => (on ? [...cur, ...ids.filter((id) => !cur.includes(id))] : cur.filter((id) => !ids.includes(id))));
   // "Select All" turns into "Deselect All" once every listed user is already checked.
   const allShown = listedUsers.length > 0 && listedUsers.every((u) => shown.includes(u.id));
   const toggleAllShown = () => setShown(allShown ? [] : listedUsers.map((u) => u.id));
@@ -154,7 +161,7 @@ function CalendarApp({ user, profile, users, settings, onLogout }) {
         layout={layout}
         onLayoutChange={setLayout}
       />
-      <UserList users={listedUsers} meId={profile.id} shown={shown} onToggle={toggleShown} allShown={allShown} onToggleAll={toggleAllShown} />
+      <UserList users={listedUsers} meId={profile.id} shown={shown} onToggle={toggleShown} onToggleGroup={toggleGroup} allShown={allShown} onToggleAll={toggleAllShown} />
       {shown.length === 0 && (
         <p className="muted banner">No user is checked, so no entries are shown.</p>
       )}
