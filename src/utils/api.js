@@ -102,6 +102,8 @@ const apiEntries = (from, to, userIds) =>
 const apiCreateEntry = (body) => apiRequest("/entries", { method: "POST", body });
 // `changes` holds only the fields that change: project_id, hours, user_id, ...
 const apiUpdateEntry = (id, changes) => apiRequest(`/entries/${id}`, { method: "PATCH", body: changes });
+// What happened to one entry, newest first: [{ id, action, audit_date, description }] (ORDS only). Empty when never changed.
+const apiEntryHistory = (id) => apiRequest(`/entries/${id}/history`);
 const apiDeleteEntry = (id) => apiRequest(`/entries/${id}`, { method: "DELETE" });
 // Deletes ALL of the signed-in user's own entries (never anyone else's).
 const apiClearMyEntries = () => apiRequest("/entries?confirm=true", { method: "DELETE" });

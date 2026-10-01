@@ -140,12 +140,22 @@ button.danger, a.button.danger { color: var(--danger); }
 .panel h2 { margin: 0 0 12px; font-size: 1.1rem; }
 .panel ul { list-style: none; margin: 0 0 12px; padding: 0; }
 .panel li {
-  display: flex; gap: 8px; align-items: center; padding: 6px 0;
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 6px 0;
   border-bottom: 1px solid var(--border);
 }
-.panel li .text { flex: 1; word-break: break-word; }
+.panel li .text { flex: 1 1 30%; min-width: 0; word-break: break-word; }
+/* The note sits next to the project, on one line (the whole note is the row's tooltip); same width as .text so the two
+   columns line up from row to row. */
+.panel li .note { flex: 1 1 30%; min-width: 0; color: var(--muted); font-size: .85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .panel li .owner { color: var(--muted); font-size: .85rem; white-space: nowrap; }
 .panel li .owner .user-dot { margin-left: 0; }
+/* Under an entry: who last touched it, a History toggle, and (when open) what changed - each on a row of its own */
+.panel li .meta { flex: 1 0 100%; display: flex; gap: 10px; align-items: baseline; color: var(--muted); font-size: .75rem; }
+.panel li .link-button { background: none; border: none; padding: 0; font: inherit; color: var(--accent); cursor: pointer; text-decoration: underline; }
+.panel li .link-button:hover { color: #0747a6; }
+.panel li .history { flex: 1 0 100%; margin: 0; padding: 0 0 0 12px; list-style: none; font-size: .8rem; }
+.panel li ul.history li { display: block; border: 0; padding: 1px 0; }
+.panel li .history time { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 6px; }
 .panel .hours { font-weight: 600; font-variant-numeric: tabular-nums; }
 .panel select {
   font: inherit; padding: 6px 10px; background: var(--surface); color: var(--text);
@@ -167,6 +177,12 @@ button.danger, a.button.danger { color: var(--danger); }
 @media (max-width: 640px) {
   .cell { min-height: 70px; }
   .entry { font-size: .65rem; }
+  /* Not enough room for the note beside the project: it moves to a line of its own under the row (and is skipped
+     when empty), before the "last edited" line and the history. */
+  .panel li .text { flex-basis: 40%; }
+  .panel li .note { flex: 1 0 100%; order: 1; }
+  .panel li .note:empty { display: none; }
+  .panel li .meta, .panel li .history { order: 2; }
 }
 
 button:disabled { opacity: .5; cursor: not-allowed; }

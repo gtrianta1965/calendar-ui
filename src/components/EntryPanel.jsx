@@ -40,6 +40,7 @@ function EntryPanel({ dateKey: selectedKey, owners, currentUser, isAdmin, restri
   const defaultOwner = owners.some((o) => o.username === currentUser) ? currentUser : "";
   const [owner, setOwner] = React.useState(defaultOwner);
   const [editingId, setEditingId] = React.useState(null);
+  const [historyId, setHistoryId] = React.useState(null);   // the entry whose change history is open (one at a time)
   const [busy, setBusy] = React.useState(false);            // an API call is in progress
   const [failure, setFailure] = React.useState("");         // why the last add / change / delete failed
   const [hiddenNote, setHiddenNote] = React.useState("");   // saved, but for a user whose entries are not shown
@@ -120,6 +121,11 @@ function EntryPanel({ dateKey: selectedKey, owners, currentUser, isAdmin, restri
   // leaves the entry as forecast, even though the user believes they just set it to Actual.
   const canPickForecast = canAddForecast || type === "forecast";
   const option = (p) => <option key={p.id} value={p.label}>{p.label}</option>;
+  // Who last touched an entry, for the small line under it: the last editor once it has been changed, otherwise who
+  // added it. An entry older than the audit columns has neither, and gets no line at all rather than a guess.
+  const nameOf = (username) => (userOf(username) || {}).label || username;
+  const touchedLine = (e) => e.modifiedBy ? `Last edited by ${nameOf(e.modifiedBy)} · ${formatWhen(e.updatedAt)}`
+    : e.createdBy ? `Added by ${nameOf(e.createdBy)} · ${formatWhen(e.createdAt)}` : "";
   const placeholder = catalog.status === "loading" ? "Loading projects…"
     : catalog.status === "error" ? "Projects unavailable" : "Customer - Project…";
   const hourOptions = HOUR_OPTIONS.includes(Number(hours))
@@ -133,6 +139,8 @@ function EntryPanel({ dateKey: selectedKey, owners, currentUser, isAdmin, restri
         {entries.map((e) => (
           <li key={e.id} title={e.note || undefined}>
             <span className="text">{e.project}</span>
+            {/* Always rendered, empty when there is no note, so the owner/type/hours columns line up from row to row. */}
+            <span className="note">{e.note}</span>
             <span className="owner" title="Whose entry">
               <span className="user-dot" style={{ background: (userOf(e.user) || {}).color }} />
               {(userOf(e.user) || {}).label || e.user}
@@ -145,6 +153,14 @@ function EntryPanel({ dateKey: selectedKey, owners, currentUser, isAdmin, restri
             <button className="icon-button danger" onClick={() => remove(e.id)} disabled={busy} title="Delete" aria-label="Delete">
               <IconDelete />
             </button>
+            <div className="meta">
+              <span>{touchedLine(e)}</span>
+              <button type="button" className="link-button" aria-expanded={historyId === e.id}
+                      onClick={() => setHistoryId(historyId === e.id ? null : e.id)}>
+                {historyId === e.id ? "Hide history" : "History"}
+              </button>
+            </div>
+            {historyId === e.id && <EntryHistory key={e.id} entryId={e.id} updatedAt={e.updatedAt} />}
           </li>
         ))}
       </ul>

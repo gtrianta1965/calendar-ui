@@ -6,7 +6,8 @@
 // limited to your own.
 //
 // An entry, as the components see it: { id, user (username), userId, project (label), projectId, hours, date,
-// type ("actual" or "forecast"), note (a string, "" when there is none) }.
+// type ("actual" or "forecast"), note (a string, "" when there is none), createdBy, modifiedBy (usernames or null),
+// createdAt, updatedAt (UTC timestamps) }.
 // Entries are grouped by date: { "YYYY-MM-DD": [entry, ...] }.
 //
 // `projectIdOf(label)` and `userIdOf(username)` translate what the form shows into the ids the API wants
@@ -24,6 +25,10 @@ const toUiEntry = (e) => ({
   date: e.entry_date,
   type: e.entry_type,
   note: e.note || "",
+  createdBy: e.created_by,       // usernames, null for an entry older than the audit columns
+  modifiedBy: e.modified_by,     // null until the entry is first changed
+  createdAt: e.created_at,
+  updatedAt: e.updated_at,
 });
 
 // The order the API uses: by user, then by creation.

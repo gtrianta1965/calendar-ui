@@ -21,7 +21,7 @@ function DayCell({ day, monthLabel, entries, userOf, holiday, isWeekend, isOutsi
         return (
           <div key={e.id} className={`entry${e.type === "actual" ? " actual" : ""}`} draggable onDragStart={(event) => onDragStart(event, e)} onDragEnd={onDragEnd}
                style={{ "--user-color": owner && owner.color }}
-               title={`${formatEntry(e)} (${owner ? owner.label : e.user}) - drag to move, Shift+drag to copy`}>
+               title={`${formatEntry(e)} (${owner ? owner.label : e.user}) - drag to move, Shift+drag to copy${e.note ? `\n${e.note}` : ""}`}>
             {formatEntry(e)}
           </div>
         );
