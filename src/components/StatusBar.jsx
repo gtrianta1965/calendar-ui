@@ -15,11 +15,17 @@ function apiEnvironment() {
   return { label: "API", host };
 }
 
+// UI_VERSION (src/config.js) is bumped by hand. A config.js that does not define it yet just shows no version,
+// instead of failing on an undefined name.
+const uiVersion = () => (typeof UI_VERSION !== "undefined" ? UI_VERSION : "");
+
 function StatusBar() {
   const env = apiEnvironment();
+  const version = uiVersion();
   return (
     <div className="status-bar" title={API_BASE_URL}>
       API: <strong>{env.label}</strong> <span className="status-bar-host">{env.host}</span>
+      {version && <span className="status-bar-version"> · UI <strong>v{version}</strong></span>}
     </div>
   );
 }
