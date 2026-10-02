@@ -12,6 +12,10 @@ const API_BASE_URL = "https://sbef1gj6zmj6uhq-dbg30.adb.eu-frankfurt-1.oracleclo
 // comment the line above and uncomment this one (see backend/README.md for its CORS settings):
 // const API_BASE_URL = "http://127.0.0.1:8000/api";
 
+// The version of this front end, shown at the bottom of every page (the calendar and the admin console) so you can tell
+// which build is running. Bump it by hand with each change.
+const UI_VERSION = "3.0.0";
+
 // NOT USED BY THE APP ANY MORE: it signs in, and lists users, through the API. These are only the usernames
 // db/create_db.py creates in a NEW database. There are no passwords here (this file is served to the browser as
 // plain text): create_db.py takes the starting password of these accounts from its --password option, from the
