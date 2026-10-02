@@ -72,7 +72,7 @@ function triggerDownload(blob, filename) {
 // The default (non-"all columns") download's columns, in the order they should appear - edit this list to
 // change what a normal export includes. Names must match reports/export's header row exactly; a name that
 // doesn't match throws (in selectColumns below) instead of silently coming up empty.
-const EXPORT_DEFAULT_COLUMNS = ["Date", "Full Name", "Customer", "Project", "Label", "Hours", "Note"];
+const EXPORT_DEFAULT_COLUMNS = ["Date", "Full Name", "Technology Group", "Customer", "Project", "Label", "Hours", "Note"];
 
 // Columns that must land as real Excel dates, with no time-of-day (see rowsToWorkbook), and ones that must
 // land as real numbers, not text (so Excel doesn't force whoever opens the file to reparse "3.50" using
