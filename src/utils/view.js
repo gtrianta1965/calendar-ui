@@ -1,14 +1,15 @@
 // Remembers which month and date are on screen (plain script, exposes globals).
 //
 // It is kept in sessionStorage, so a page reload (or anything that reloads the page, such as a live-reload server
-// noticing that the database file changed) comes back to the same month, selected date and checked users instead of
-// starting over.
+// noticing that the database file changed) comes back to the same month, selected date, checked users and
+// forecast/actual filter instead of starting over.
 // It ends with the tab, and is cleared when someone logs in or out.
 
 const VIEW_STORAGE_KEY = "calendar-view-v1";
 
 // { year, month (0-based), selected ("YYYY-MM-DD" or null), shown (user ids, or null),
-//   layout ("calendar" or "pivot") }, or null when nothing valid is saved.
+//   layout ("calendar" or "pivot"), showForecast, showActual (booleans, true when missing) }, or null when nothing valid
+// is saved.
 function loadView() {
   try {
     const v = JSON.parse(sessionStorage.getItem(VIEW_STORAGE_KEY) || "null");
@@ -16,7 +17,10 @@ function loadView() {
     const selected = typeof v.selected === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v.selected) ? v.selected : null;
     const shown = Array.isArray(v.shown) ? v.shown.filter(Number.isInteger) : null;
     const layout = v.layout === "pivot" ? "pivot" : "calendar";
-    return { year: v.year, month: v.month, selected, shown, layout };
+    // A view saved before the filter existed has neither flag: both entry types stay visible.
+    const showForecast = typeof v.showForecast === "boolean" ? v.showForecast : true;
+    const showActual = typeof v.showActual === "boolean" ? v.showActual : true;
+    return { year: v.year, month: v.month, selected, shown, layout, showForecast, showActual };
   } catch (e) {
     return null;
   }

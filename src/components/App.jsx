@@ -6,8 +6,6 @@ function App() {
   const [notice, setNotice] = React.useState("");                  // why the login page is showing, if not just "signed out"
 
   const start = (user, users, settings) => {
-    // Entries saved before accounts existed have no owner: the first user in the list adopts them.
-    if (users.length && user.id === Math.min(...users.map((u) => u.id))) adoptLegacyEntries(user.username);
     setNotice("");
     setSession({ user, users, settings });
   };

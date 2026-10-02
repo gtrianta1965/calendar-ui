@@ -64,6 +64,10 @@ button.danger, a.button.danger { color: var(--danger); }
 .user-group legend label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
 .user-group legend input { margin: 0; cursor: pointer; }
 .user-groups > .select-all { align-self: center; }
+/* "Show forecast" / "Show actuals": which kinds of entry are drawn, a row under the users */
+.type-filter { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 0 0 12px; color: var(--muted); font-size: .85rem; }
+.type-filter label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.type-filter input { margin: 0 2px 0 0; cursor: pointer; }
 .user-list { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; padding: 0; list-style: none; color: var(--muted); font-size: .85rem; }
 .user-list li { display: flex; align-items: center; }
 .user-list label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
@@ -223,7 +227,6 @@ button.danger-solid:hover { background: #a32a21; }
 .auth-note { color: var(--muted); }
 .banner { margin: 0 0 12px; }
 .banner button { margin-left: 6px; }
-.import-banner { color: var(--text); background: var(--accent-soft); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-size: .9rem; }
 
 /* Calendar/Pivot switch, in the toolbar next to Refresh. */
 .layout-switch { display: flex; gap: 2px; border: 1px solid var(--border); border-radius: 6px; padding: 2px; }

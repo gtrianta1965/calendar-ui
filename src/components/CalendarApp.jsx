@@ -26,6 +26,10 @@ function CalendarApp({ user, profile, users, settings, onLogout }) {
   const [month, setMonth] = React.useState(saved ? saved.month : now.getMonth());
   const [selected, setSelected] = React.useState(saved ? saved.selected : null);
   const [layout, setLayout] = React.useState(saved ? saved.layout : "calendar");   // "calendar" or "pivot"
+  // Which kinds of entry are drawn: both at first, and after a reload as they were left (EntryTypeFilter's check boxes).
+  const [showForecast, setShowForecast] = React.useState(saved ? saved.showForecast : true);
+  const [showActual, setShowActual] = React.useState(saved ? saved.showActual : true);
+  const isTypeShown = React.useCallback((type) => (type === "actual" ? showActual : showForecast), [showActual, showForecast]);
   // The checked users (their ids). At first only the signed-in user (nobody for an administrator, who is not listed);
   // after a reload, as they were left.
   const [shown, setShown] = React.useState(() => {
@@ -33,7 +37,9 @@ function CalendarApp({ user, profile, users, settings, onLogout }) {
     const kept = saved && saved.shown ? saved.shown.filter((id) => listed.has(id)) : null;
     return kept && (kept.length > 0 || saved.shown.length === 0) ? kept : isAdmin ? [] : [profile.id];
   });
-  React.useEffect(() => { saveView({ year, month, selected, shown, layout }); }, [year, month, selected, shown, layout]);
+  React.useEffect(() => {
+    saveView({ year, month, selected, shown, layout, showForecast, showActual });
+  }, [year, month, selected, shown, layout, showForecast, showActual]);
   const toggleShown = (id) => setShown((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
   // A group's checkbox: check (on) or uncheck every one of its users, leaving the other groups as they are.
   const toggleGroup = (ids, on) => setShown((cur) => (on ? [...cur, ...ids.filter((id) => !cur.includes(id))] : cur.filter((id) => !ids.includes(id))));
@@ -67,10 +73,6 @@ function CalendarApp({ user, profile, users, settings, onLogout }) {
   const projectIdOf = React.useCallback(
     (label) => (catalog.projects.find((p) => p.label === label) || {}).id, [catalog.projects]);
   const userIdOf = React.useCallback((username) => (known[String(username).toLowerCase()] || {}).id, [known]);
-  const activeUserIdOf = React.useCallback((username) => {
-    const u = known[String(username).toLowerCase()];
-    return u && u.active ? u.id : undefined;
-  }, [known]);
 
   // The entries on screen: the first to the last cell of the month grid (adjacent-month days included).
   const [from, to] = React.useMemo(() => {
@@ -80,16 +82,17 @@ function CalendarApp({ user, profile, users, settings, onLogout }) {
   const entriesState = useEntries({ from, to, userIds: shown, projectIdOf, userIdOf });
   const { addEntry, updateEntry, moveEntry, removeEntry, clearAll } = entriesState;
   const [dragError, setDragError] = React.useState("");   // a move or a Shift-copy that failed
-  // Only the checked users' entries are shown: also right after an entry is added or moved to someone unchecked.
+  // Only the checked users' entries, of the checked types, are shown: also right after an entry is added or moved to
+  // someone unchecked, or saved with an unchecked type. The grid, the pivot and the entry panel all read this one list.
   const isShown = (username) => shown.includes(userIdOf(username));
   const entries = React.useMemo(() => {
     const visible = {};
     for (const [date, list] of Object.entries(entriesState.entries)) {
-      const kept = list.filter((e) => shown.includes(e.userId));
+      const kept = list.filter((e) => shown.includes(e.userId) && isTypeShown(e.type));
       if (kept.length) visible[date] = kept;
     }
     return visible;
-  }, [entriesState.entries, shown]);
+  }, [entriesState.entries, shown, isTypeShown]);
 
   const changeMonth = (delta) => {
     const d = new Date(year, month + delta, 1);
@@ -162,8 +165,17 @@ function CalendarApp({ user, profile, users, settings, onLogout }) {
         onLayoutChange={setLayout}
       />
       <UserList users={listedUsers} meId={profile.id} shown={shown} onToggle={toggleShown} onToggleGroup={toggleGroup} allShown={allShown} onToggleAll={toggleAllShown} />
+      <EntryTypeFilter
+        showForecast={showForecast}
+        showActual={showActual}
+        onForecastChange={setShowForecast}
+        onActualChange={setShowActual}
+      />
       {shown.length === 0 && (
         <p className="muted banner">No user is checked, so no entries are shown.</p>
+      )}
+      {!showForecast && !showActual && (
+        <p className="muted banner">Neither forecast nor actuals is checked, so no entries are shown.</p>
       )}
       {catalog.status === "error" && (
         <p className="auth-error banner" role="alert">
@@ -198,12 +210,6 @@ function CalendarApp({ user, profile, users, settings, onLogout }) {
           {dragError} <button onClick={() => setDragError("")}>Dismiss</button>
         </p>
       )}
-      <ImportBanner
-        ready={catalog.status === "ready"}
-        projectIdOf={projectIdOf}
-        activeUserIdOf={activeUserIdOf}
-        onImported={entriesState.reload}
-      />
       {layout === "pivot" ? (
         <MonthPivot
           year={year}
@@ -237,6 +243,7 @@ function CalendarApp({ user, profile, users, settings, onLogout }) {
         restrictUserToActuals={settings.restrict_user_to_actuals !== false}
         userOf={userOf}
         isShown={isShown}
+        isTypeShown={isTypeShown}
         entries={selected ? entries[selected] || [] : []}
         onAdd={addEntry}
         onUpdate={updateEntry}

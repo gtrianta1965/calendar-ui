@@ -26,9 +26,10 @@ const IconDelete = () => (
 );
 
 // owners: the users an entry can be given to, [{ username, label, color }] (never an administrator); currentUser: the signed-in username;
-// userOf(username): an entry owner's { id, label, color }; isShown(username): whether that user's entries are checked.
+// userOf(username): an entry owner's { id, label, color }; isShown(username): whether that user's entries are checked;
+// isTypeShown(type): whether "forecast" / "actual" entries are checked (EntryTypeFilter).
 // onAdd, onUpdate and onRemove call the API and resolve with { ok: true } or { ok: false, error }.
-function EntryPanel({ dateKey: selectedKey, owners, currentUser, isAdmin, restrictUserToActuals, userOf, isShown, entries, onAdd, onUpdate, onRemove }) {
+function EntryPanel({ dateKey: selectedKey, owners, currentUser, isAdmin, restrictUserToActuals, userOf, isShown, isTypeShown, entries, onAdd, onUpdate, onRemove }) {
   // Select values are strings. project "" means nothing chosen yet; hours starts at the default.
   const [project, setProject] = React.useState("");
   const [hours, setHours] = React.useState(String(DEFAULT_HOURS));
@@ -86,6 +87,10 @@ function EntryPanel({ dateKey: selectedKey, owners, currentUser, isAdmin, restri
     // An entry for a user whose box is unchecked is saved but not shown: say so instead of letting it seem lost.
     if (!isShown(owner)) {
       setHiddenNote(`Saved for ${(userOf(owner) || {}).label || owner}, whose entries are not shown. Tick their box to see them.`);
+    } else if (!isTypeShown(type)) {
+      // Likewise for a kind of entry the "Show forecast" / "Show actuals" boxes currently hide.
+      const kind = type === "actual" ? "actuals" : "forecast";
+      setHiddenNote(`Saved as ${type === "actual" ? "an actual" : "a forecast"}, and ${kind} are not shown. Tick "Show ${kind}" to see it.`);
     }
   };
 
