@@ -72,18 +72,30 @@ function AdminApp() {
   ];
 
   return (
+    <>
+      <header className="appbar">
+        <div className="appbar-inner">
+          <div className="brand">
+            <BrandMark size={34} />
+            <div className="brand-text">
+              <span className="brand-kicker">Oracle Consulting Calendar</span>
+              <h1 className="brand-name">Calendar Admin</h1>
+            </div>
+          </div>
+          <div className="user-chip" style={{ "--user-color": session.color }}>
+            <span className="avatar" aria-hidden="true">{initialsOf(session.full_name || session.username)}</span>
+            <span className="user-meta">
+              <span className="user-name"><span className="sr-only">Signed in as </span>{session.full_name || session.username}</span>
+              <span className="role">admin</span>
+            </span>
+          </div>
+          <a className="button" href="../index.html" title="Back to the calendar">
+            Calendar
+          </a>
+          <button onClick={logout}>Log out</button>
+        </div>
+      </header>
     <div className="app">
-      <div className="header">
-        <h1>Calendar Admin</h1>
-        <span className="user">
-          Signed in as <strong>{session.full_name || session.username}</strong>
-          <span className="role"> (admin)</span>
-        </span>
-        <a className="button" href="../index.html" title="Back to the calendar">
-          Calendar
-        </a>
-        <button onClick={logout}>Log out</button>
-      </div>
       <nav className="tabs">
         {TABS.map((t) => (
           <button key={t.id} className={t.id === tab ? "tab active" : "tab"} onClick={() => setTab(t.id)}>{t.label}</button>
@@ -97,5 +109,6 @@ function AdminApp() {
       {tab === "export" && <ExportAdmin />}
       <StatusBar />
     </div>
+    </>
   );
 }

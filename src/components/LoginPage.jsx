@@ -21,8 +21,13 @@ function LoginPage({ onLogin, notice }) {
 
   return (
     <div className="auth-page">
+      <div className="auth-brand">
+        <BrandMark size={52} />
+        <div className="brand-name">Oracle Consulting Calendar</div>
+      </div>
       <form className="auth-card" onSubmit={submit}>
         <h1>Sign in</h1>
+        <p className="auth-lead">Enter your account details to continue.</p>
 
         <label className="field">
           <span>Username</span>

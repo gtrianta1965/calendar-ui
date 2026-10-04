@@ -173,13 +173,14 @@ function CalendarApp({ user, profile, users, settings, onLogout }) {
   );
 
   return (
-    <div className="app">
+    <>
       <Header
         profile={profile}
         onClear={() => setConfirmingClear(true)}
         canClear
         onLogout={onLogout}
       />
+      <div className="app">
       <CalendarToolbar
         year={year}
         month={month}
@@ -306,6 +307,7 @@ function CalendarApp({ user, profile, users, settings, onLogout }) {
           onCancel={() => setConfirmingClear(false)}
         />
       )}
-    </div>
+      </div>
+    </>
   );
 }

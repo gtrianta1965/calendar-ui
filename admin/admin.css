@@ -1,72 +1,90 @@
-/* Admin-only styling: the grid, tabs and pills. Everything else (buttons, .header, .auth-*, the color
-   variables) comes from ../css/styles.css, loaded before this file - so the admin console looks like the
-   same product, not a different one. */
+/* Admin-only styling: the tabs, the data tables and the pills. Everything else (buttons, the app bar, .auth-*, the
+   design tokens in :root) comes from ../css/styles.css, loaded before this file - so the admin console looks like
+   the same product, not a different one. */
 
-.tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
-.tabs .tab { border: none; border-radius: 6px 6px 0 0; background: transparent; padding: 8px 16px; }
-.tabs .tab:hover { background: var(--accent-soft); }
-.tabs .tab.active { background: var(--surface); border: 1px solid var(--border); border-bottom-color: var(--surface); margin-bottom: -1px; font-weight: 600; }
+/* Tabs: an underline marks the current one */
+.tabs { display: flex; gap: 2px; margin-bottom: 18px; border-bottom: 1px solid var(--border); overflow-x: auto; overflow-y: hidden; }
+.tabs .tab {
+  border: none; border-radius: 0; background: transparent; box-shadow: none; min-height: 0; padding: 11px 16px;
+  color: var(--muted); font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.tabs .tab:hover { background: transparent; color: var(--text); border-bottom-color: var(--border-strong); }
+.tabs .tab.active { color: var(--brand); font-weight: 650; border-bottom-color: var(--brand); }
 
-.data-table { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 20px; }
-.data-table-head { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
-.data-table-head h2 { margin: 0; font-size: 1.1rem; flex: 0 0 auto; }
+.data-table {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
+  padding: 18px; margin-bottom: 20px;
+}
+.data-table-head { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+.data-table-head h2 { margin: 0; font-size: 1.1rem; font-weight: 650; flex: 0 0 auto; }
 .data-table-head .filter { flex: 1 1 160px; min-width: 0; }
 .data-table-head .filter,
 .data-table input[type="text"],
 .data-table input[type="email"],
 .data-table input[type="password"],
-.data-table select {
-  font: inherit; padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text);
-}
+.data-table select { padding: 0 10px; min-height: 34px; }
 
-.table-scroll { overflow-x: auto; }
+.table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
 .data-table table { width: 100%; border-collapse: collapse; font-size: .9rem; }
-.data-table th, .data-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; white-space: nowrap; }
-.data-table th { color: var(--muted); font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; }
-.data-table tr.editing td { background: var(--accent-soft); }
+.data-table th, .data-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; white-space: nowrap; }
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table th {
+  background: var(--surface-2); color: var(--muted); font-weight: 700; font-size: .68rem; text-transform: uppercase; letter-spacing: .1em;
+}
+.data-table tbody tr { transition: background var(--t); }
+.data-table tbody tr:hover td { background: #fafbff; }
+.data-table tr.editing td { background: var(--brand-50); }
 .data-table td.actions, .data-table th.actions { white-space: nowrap; text-align: right; }
+/* The actions column stays pinned to the right edge while the rest of a wide table (a row being edited, with its inputs)
+   scrolls sideways, so Save / Cancel / Edit are always in reach. */
+.data-table td.actions, .data-table th.actions { position: sticky; right: 0; z-index: 1; background: var(--surface); box-shadow: -10px 0 10px -10px rgba(16, 24, 40, .22); }
+.data-table th.actions { background: var(--surface-2); }
+.data-table tbody tr:hover td.actions { background: #fafbff; }
+.data-table tr.editing td.actions { background: var(--brand-50); }
 .data-table td.actions button { margin-left: 6px; }
-.icon-button { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; }
 .data-table .static { color: var(--text); }
 .data-table .muted-cell { color: var(--muted); }
 
 .color-field { display: inline-flex; align-items: center; gap: 6px; }
 .color-field input { width: 8em; }
 
-.pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: .78rem; font-weight: 600; }
-.pill-on { background: #e3fcef; color: #006644; }
-.pill-off { background: #f4f5f7; color: var(--muted); }
+.pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .74rem; font-weight: 650; letter-spacing: .01em; }
+.pill-on { background: var(--ok-bg); color: var(--ok-ink); }
+.pill-off { background: #eceff5; color: #55617a; }
 
 .editing-extra td { white-space: normal; padding-top: 0; }
-.inline-field { display: inline-flex; align-items: center; gap: 6px; margin-right: 20px; font-size: .85rem; color: var(--muted); }
-.inline-field input { font: inherit; padding: 4px 8px; border: 1px solid var(--border); border-radius: 6px; }
+.inline-field { display: inline-flex; align-items: center; gap: 6px; margin-right: 20px; font-size: .85rem; color: var(--text-2); }
+.inline-field input { padding: 0 8px; min-height: 30px; }
 
 /* Favorites tab: projects on the left, everyone (with a checkbox) on the right. */
 .favorites-columns { display: flex; gap: 20px; flex-wrap: wrap; }
 .favorites-pane { flex: 1 1 280px; min-width: 0; }
-.favorites-pane h3 { margin: 0 0 8px; font-size: .95rem; }
-.favorites-pane h3 em { font-style: normal; color: var(--text); }
-.favorites-list { list-style: none; margin: 0; padding: 0; max-height: 420px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; }
+.favorites-pane h3 { margin: 0 0 10px; font-size: .95rem; font-weight: 650; }
+.favorites-pane h3 em { font-style: normal; color: var(--brand-ink); }
+.favorites-list { list-style: none; margin: 0; padding: 0; max-height: 420px; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
 .favorites-list li + li { border-top: 1px solid var(--border); }
 .favorites-pick {
-  display: block; width: 100%; text-align: left; border: none; border-radius: 0;
-  background: var(--surface); padding: 8px 10px; font-size: .88rem;
+  display: block; width: 100%; text-align: left; justify-content: flex-start; border: none; border-radius: 0; box-shadow: none;
+  background: var(--surface); padding: 9px 12px; font-size: .88rem; min-height: 0;
 }
-.favorites-pick:hover { background: var(--accent-soft); }
-.favorites-pick.active { background: var(--accent); color: #fff; }
-.favorites-pick.active .muted-cell { color: #d7e3fa; }
-.favorites-user { display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-size: .88rem; cursor: pointer; }
-.favorites-user:hover { background: var(--accent-soft); }
+.favorites-pick:hover { background: var(--brand-50); }
+.favorites-pick.active { background: var(--brand); color: #fff; }
+.favorites-pick.active .muted-cell { color: #d3defc; }
+.favorites-user { display: flex; align-items: center; gap: 8px; padding: 9px 12px; font-size: .88rem; cursor: pointer; transition: background var(--t); }
+.favorites-user:hover { background: var(--brand-50); }
 .favorites-user input[type="checkbox"] { margin: 0; }
 
 /* Export tab: a small form (month picker + optional filters), then Download buttons below. */
-.export-admin p.muted { margin: 0 0 16px; max-width: 60ch; }
+.export-admin p.muted { margin: 0 0 18px; max-width: 62ch; }
 .export-fields { display: flex; flex-wrap: wrap; gap: 14px 20px; margin-bottom: 16px; }
-.export-field { display: flex; flex-direction: column; gap: 4px; font-size: .8rem; font-weight: 600; color: var(--muted); }
-.export-field select, .export-field input {
-  font: inherit; font-weight: 400; color: var(--text); padding: 6px 8px;
-  border: 1px solid var(--border); border-radius: 6px; min-width: 12em;
-}
+.export-field { display: flex; flex-direction: column; gap: 5px; font-size: .78rem; font-weight: 650; color: var(--text-2); }
+.export-field select, .export-field input { font-weight: 400; padding: 0 10px; min-height: 36px; min-width: 12em; }
 .export-all-columns { margin: 0 0 4px; }
 .export-columns-note { margin: 0 0 16px; font-size: .82rem; }
 .export-actions { display: flex; gap: 10px; }
+.export-actions button { min-height: 38px; }
+
+@media (max-width: 640px) {
+  .data-table { padding: 12px; }
+  .tabs .tab { padding: 10px 12px; }
+}

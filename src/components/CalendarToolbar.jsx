@@ -7,9 +7,11 @@ function CalendarToolbar({ year, month, onPrev, onToday, onNext, onRefresh, refr
   return (
     <div className="toolbar">
       <h2>{MONTHS[month]} {year}</h2>
-      <button onClick={onPrev} aria-label="Previous month">&lt; Prev</button>
-      <button onClick={onToday}>Today</button>
-      <button onClick={onNext} aria-label="Next month">Next &gt;</button>
+      <div className="nav-group" role="group" aria-label="Month navigation">
+        <button className="chevron" onClick={onPrev} aria-label="Previous month" title="Previous month">&#8249;</button>
+        <button onClick={onToday}>Today</button>
+        <button className="chevron" onClick={onNext} aria-label="Next month" title="Next month">&#8250;</button>
+      </div>
       <button onClick={onRefresh} disabled={refreshing} title="Load the entries and projects again, to see what others changed">
         {refreshing ? "Refreshing…" : "Refresh"}
       </button>

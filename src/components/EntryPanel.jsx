@@ -170,7 +170,7 @@ function EntryPanel({ dateKey: selectedKey, owners, currentUser, isAdmin, restri
           </li>
         ))}
       </ul>
-      <div onKeyDown={(e) => { if (e.key === "Escape") resetEditor(); }}>
+      <div className="entry-form" onKeyDown={(e) => { if (e.key === "Escape") resetEditor(); }}>
         <div className="row">
           <select
             className="owner-select"

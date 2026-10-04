@@ -1,293 +1,423 @@
+/* ==========================================================================================================
+   Design tokens. Everything below reads these, so the whole look (and, later, a dark theme) is one place.
+   --accent / --accent-soft are the older names, kept as aliases: components and admin.css still use them.
+   Users' own colors are never touched by the theme - they come from the user directory (--user-color).
+   ========================================================================================================== */
 :root {
-  --bg: #f4f5f7;
+  --font: Inter, "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, monospace;
+
+  --bg: #f3f5f9;
   --surface: #ffffff;
-  --border: #dfe1e6;
-  --text: #172b4d;
-  --muted: #6b778c;
-  --accent: #0052cc;
-  --accent-soft: #e6effc;
-  --today: #fff4d6;
-  --danger: #c9372c;
-  --holiday-bg: #ececec;
-  --holiday-banner-bg: #d0d0d0;
-  --weekend-bg: #f2f3f5;
+  --surface-2: #f8f9fc;
+  --border: #e3e7ef;
+  --border-strong: #cbd2df;
+  --text: #0f1b33;
+  --text-2: #3a4864;
+  --muted: #616d86;
+
+  --brand: #3050d0;
+  --brand-hover: #2741b0;
+  --brand-ink: #1c2f8a;
+  --brand-50: #eef2ff;
+  --brand-100: #dfe6ff;
+  --ring: rgba(48, 80, 208, .28);
+  --nav-1: #17264a;
+  --nav-2: #0f1b33;
+
+  --danger: #c62d3a;
+  --danger-50: #fdecee;
+  --ok-bg: #e5f6ec;
+  --ok-ink: #0b6b3a;
+
+  --accent: var(--brand);
+  --accent-soft: var(--brand-50);
+  --today: #eef2ff;
+  --weekend-bg: #f8f9fc;
+  --holiday-bg: #f1f2f7;
+  --holiday-banner-bg: #e2e5ee;
+
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --shadow-xs: 0 1px 2px rgba(16, 24, 40, .05);
+  --shadow-sm: 0 1px 3px rgba(16, 24, 40, .08), 0 1px 2px rgba(16, 24, 40, .04);
+  --shadow-md: 0 6px 18px rgba(16, 24, 40, .10);
+  --shadow-lg: 0 18px 48px rgba(16, 24, 40, .22);
+  --t: .12s ease;
 }
+
 * { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
-  padding-bottom: 26px; /* room for the fixed .status-bar, so it never covers the page's own content */
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  padding-bottom: 30px; /* room for the fixed .status-bar, so it never covers the page's own content */
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.45;
   background: var(--bg);
   color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv11", "ss03";
 }
+::selection { background: var(--brand-100); }
+* { scrollbar-width: thin; scrollbar-color: #c3cad8 transparent; }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+input[type="checkbox"], input[type="radio"] { accent-color: var(--brand); }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 
 /* Which API this page talks to (local Oracle, Autonomous, ...): see StatusBar.jsx */
 .status-bar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
-  padding: 5px 12px; font-size: .72rem; color: var(--muted);
-  background: var(--surface); border-top: 1px solid var(--border);
+  padding: 6px 16px; font-size: .72rem; color: var(--muted);
+  background: rgba(255, 255, 255, .92); backdrop-filter: blur(6px);
+  border-top: 1px solid var(--border);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.status-bar strong { color: var(--text); font-weight: 600; }
-.status-bar-host { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; }
-.app { max-width: 1350px; margin: 0 auto; padding: 24px 16px; }
+.status-bar strong { color: var(--text-2); font-weight: 600; }
+.status-bar-host { font-family: var(--mono); }
+.app { max-width: 1350px; margin: 0 auto; padding: 22px 16px 28px; }
 
-/* Buttons (a.button: a link made to look like one, e.g. the header's Admin link) */
+/* ==========================================================================================================
+   Buttons (a.button: a link made to look like one, e.g. the app bar's Admin link)
+   ========================================================================================================== */
 button, a.button {
-  font: inherit; cursor: pointer; border-radius: 6px;
-  border: 1px solid var(--border); background: var(--surface);
-  color: var(--text); padding: 6px 12px;
-  text-decoration: none; display: inline-block; line-height: 1.4;
+  font: inherit; font-weight: 500; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 34px; padding: 0 14px; line-height: 1.2;
+  border-radius: var(--r-md); border: 1px solid var(--border-strong);
+  background: var(--surface); color: var(--text); text-decoration: none;
+  box-shadow: var(--shadow-xs);
+  transition: background var(--t), border-color var(--t), box-shadow var(--t), color var(--t);
 }
-button:hover, a.button:hover { background: var(--accent-soft); }
-button.primary, a.button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-button.primary:hover, a.button.primary:hover { background: #0747a6; }
+button:hover, a.button:hover { background: var(--surface-2); border-color: #b4bdce; }
+button:active, a.button:active { background: #eef1f7; }
+button.primary, a.button.primary { background: var(--brand); border-color: var(--brand); color: #fff; box-shadow: 0 1px 2px rgba(23, 38, 100, .30); }
+button.primary:hover, a.button.primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
 button.danger, a.button.danger { color: var(--danger); }
-.icon-button { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; }
+button.danger:hover { background: var(--danger-50); border-color: #e5a3aa; }
+.icon-button { width: 30px; min-height: 30px; height: 30px; padding: 0; border-radius: var(--r-sm); }
+button:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
+button:disabled:hover { background: var(--surface); border-color: var(--border-strong); }
+button.primary:disabled, button.primary:disabled:hover { background: var(--brand); border-color: var(--brand); }
 
-/* Header */
-/* .header: session-level chrome (rare actions). .toolbar: the month and its navigation (frequent actions),
-   right above the grid - same row layout as .header, one level down in visual weight. */
-.header, .toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-.header h1 { flex: 1 1 auto; margin: 0; font-size: 1.1rem; color: var(--muted); font-weight: 600; }
-.toolbar h2 { flex: 1 1 auto; margin: 0; font-size: 1.5rem; }
-.header .user { color: var(--muted); font-size: .9rem; }
+/* ==========================================================================================================
+   App bar: the dark band across the top (Header.jsx, and the admin console's own). Brand on the left; who you
+   are, the rarely used actions and Log out on the right.
+   ========================================================================================================== */
+.appbar {
+  background: linear-gradient(180deg, var(--nav-1), var(--nav-2)); color: #e9edf8;
+  box-shadow: 0 2px 10px rgba(15, 27, 51, .22); position: relative; z-index: 20;
+}
+.appbar-inner { max-width: 1350px; margin: 0 auto; padding: 0 16px; min-height: 58px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 11px; flex: 1 1 auto; min-width: 0; }
+.brand-mark { flex: 0 0 auto; display: block; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .35)); }
+.brand-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; }
+.brand-name { margin: 0; font-size: 1.02rem; font-weight: 650; letter-spacing: .005em; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand-kicker { font-size: .66rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #92a3cb; }
+.user-chip { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.avatar {
+  flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  font-size: .78rem; font-weight: 700; letter-spacing: .02em; color: #0f1b33;
+  background: color-mix(in srgb, var(--user-color, #8da0cf) 38%, #fff);
+  box-shadow: 0 0 0 2px var(--user-color, #8da0cf), 0 0 0 4px rgba(255, 255, 255, .10);
+}
+.user-meta { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+.user-name { font-weight: 600; color: #fff; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.role { font-size: .64rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #92a3cb; }
+.appbar button, .appbar a.button {
+  background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .18); color: #fff; box-shadow: none; min-height: 34px;
+}
+.appbar button:hover, .appbar a.button:hover { background: rgba(255, 255, 255, .17); border-color: rgba(255, 255, 255, .32); }
 .user-dot { display: inline-block; width: .7em; height: .7em; border-radius: 50%; margin: 0 .35em 0 .2em; }
 
-/* Who is in the system: everyone from the API's user directory, in their color, one box per technology group */
-.user-groups { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px 12px; margin: 0 0 12px; }
+/* ==========================================================================================================
+   Toolbar: the month and the controls that change it, right above the grid they control.
+   ========================================================================================================== */
+.toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; margin-bottom: 16px; }
+.toolbar h2 { flex: 1 1 auto; margin: 0; font-size: 1.65rem; font-weight: 700; letter-spacing: -.015em; color: var(--text); }
+.nav-group { display: inline-flex; box-shadow: var(--shadow-xs); border-radius: var(--r-md); }
+.nav-group button { border-radius: 0; box-shadow: none; margin-left: -1px; padding: 0 13px; }
+.nav-group button:first-child { border-radius: var(--r-md) 0 0 var(--r-md); margin-left: 0; }
+.nav-group button:last-child { border-radius: 0 var(--r-md) var(--r-md) 0; }
+.nav-group .chevron { font-size: 1.15rem; line-height: 1; padding: 0 11px; }
+
+/* Calendar/Pivot switch: a segmented control, the selected side raised. */
+.layout-switch { display: inline-flex; gap: 2px; padding: 3px; background: #e6eaf2; border-radius: 10px; }
+.layout-switch button { border: none; background: transparent; box-shadow: none; min-height: 28px; padding: 0 14px; border-radius: 7px; font-size: .85rem; color: var(--text-2); }
+.layout-switch button:hover { background: rgba(255, 255, 255, .55); }
+.layout-switch button.active { background: var(--surface); color: var(--brand-ink); font-weight: 600; box-shadow: 0 1px 3px rgba(16, 24, 40, .16); }
+
+/* ==========================================================================================================
+   Who is in the system: everyone from the API's user directory, in their color, one card per technology group
+   ========================================================================================================== */
+.user-groups { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px 12px; margin: 0 0 12px; }
 .user-group {
-  margin: 0; padding: 2px 10px 6px; min-width: 0;
-  border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+  margin: 0; padding: 4px 10px 8px; min-width: 0;
+  border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-xs);
 }
-.user-group legend { padding: 0 6px; font-size: .75rem; font-weight: 700; letter-spacing: .04em; color: var(--text); }
-.user-group legend label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.user-group legend { padding: 0 6px; font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.user-group legend label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
 .user-group legend input { margin: 0; cursor: pointer; }
 .user-groups > .select-all { align-self: center; }
-/* "Show forecast" / "Show actuals": which kinds of entry are drawn, a row under the users */
-.type-filter { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 0 0 12px; color: var(--muted); font-size: .85rem; }
-.type-filter label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
-.type-filter input { margin: 0 2px 0 0; cursor: pointer; }
-/* A small sample next to each box, in neutral gray (no user's color), so the row doubles as a legend for how entries look */
-.type-swatch { display: inline-block; width: 20px; height: 16px; border-radius: 2px; border-left: 4px solid var(--muted); background: color-mix(in srgb, var(--muted) 32%, #fff); }
-.type-swatch.forecast { border-left-style: dashed; }
-.user-list { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; padding: 0; list-style: none; color: var(--muted); font-size: .85rem; }
+.user-list { display: flex; flex-wrap: wrap; gap: 2px 6px; margin: 0; padding: 0; list-style: none; color: var(--text-2); font-size: .86rem; }
 .user-list li { display: flex; align-items: center; }
-.user-list label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.user-list label { display: flex; align-items: center; gap: 5px; cursor: pointer; padding: 3px 9px 3px 6px; border-radius: 999px; transition: background var(--t); }
+.user-list label:hover { background: var(--brand-50); }
 .user-list input { margin: 0 2px 0 0; cursor: pointer; }
-.user-list .user-dot { margin-left: 0; }
-.user-list .inactive { font-weight: 400; font-style: italic; }
+.user-list .user-dot { margin-left: 0; box-shadow: 0 0 0 1px rgba(15, 27, 51, .18); }
+.user-list .inactive { font-weight: 400; font-style: italic; color: var(--muted); }
 .user-list .me { color: var(--text); font-weight: 600; }
 .user-groups .select-all {
-  background: none; border: none; padding: 0; font: inherit; color: var(--accent);
-  cursor: pointer; text-decoration: underline;
+  background: none; border: none; box-shadow: none; min-height: 0; padding: 4px 6px; font-weight: 600; font-size: .85rem; color: var(--brand);
 }
-.user-groups .select-all:hover { color: #0747a6; }
+.user-groups .select-all:hover { background: var(--brand-50); color: var(--brand-hover); }
 
-/* Calendar grid */
+/* "Show forecast" / "Show actuals": which kinds of entry are drawn, a row under the users */
+.type-filter { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0 0 14px; color: var(--text-2); font-size: .85rem; }
+.type-filter label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.type-filter input { margin: 0 2px 0 0; cursor: pointer; }
+/* A small sample next to each box, in neutral gray (no user's color), so the row doubles as a legend for how entries look */
+.type-swatch { display: inline-block; width: 20px; height: 16px; border-radius: 3px; border-left: 4px solid #8791a8; background: color-mix(in srgb, #8791a8 28%, #fff); }
+.type-swatch.forecast { border-left-style: dashed; }
+
+/* ==========================================================================================================
+   Calendar grid
+   ========================================================================================================== */
 .grid {
   display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
-  border: 1px solid var(--border); border-radius: 8px;
-  background: var(--border); gap: 1px; overflow: hidden;
+  border: 1px solid var(--border); border-radius: var(--r-lg);
+  background: var(--border); gap: 1px; overflow: hidden; box-shadow: var(--shadow-sm);
 }
 .dow {
-  background: #ebecf0; padding: 8px; text-align: center;
-  font-size: .8rem; font-weight: 600; color: var(--muted);
+  background: var(--surface-2); padding: 10px 8px; text-align: center;
+  font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
 }
 .cell {
-  background: var(--surface); min-height: 110px; padding: 6px;
+  background: var(--surface); min-height: 118px; padding: 7px 8px;
   cursor: pointer; display: flex; flex-direction: column; gap: 4px;
-  overflow: hidden;
+  overflow: hidden; transition: background var(--t);
 }
-.cell:hover { background: var(--accent-soft); }
+.cell:hover { background: #f5f7ff; }
 /* Days of the previous/next month: dimmed, but still clickable and editable. */
-.cell.outside { background: #f7f8fa; }
-.cell.outside:hover { background: var(--accent-soft); }
-.cell.outside:not(.today) .num { color: var(--muted); font-weight: 500; }
+.cell.outside { background: #fbfcfe; }
+.cell.outside:hover { background: #f5f7ff; }
+.cell.outside:not(.today) .num { color: #8a94aa; font-weight: 500; }
 /* Just a visual cue - weekends are ordinary days otherwise (an actual entry there is nothing exceptional).
    Comes after .outside so it wins there too, but before .today so an actual today's highlight still wins. */
 .cell.weekend { background: var(--weekend-bg); }
 .cell.today { background: var(--today); }
-.cell.selected { outline: 2px solid var(--accent); outline-offset: -2px; }
-.cell.drop-target { outline: 2px dashed var(--accent); outline-offset: -2px; background: var(--accent-soft); }
+.cell.selected { outline: 2px solid var(--brand); outline-offset: -2px; }
+.cell.drop-target { outline: 2px dashed var(--brand); outline-offset: -2px; background: var(--brand-50); }
 /* Comes after .cell:hover/.outside/.today above so a holiday's grey wins over them (same equal-specificity,
    later-wins pattern .today already relies on), but .selected/.drop-target still show through via outline. */
 .cell.holiday { background: var(--holiday-bg); }
 .holiday-banner {
-  margin: -6px -6px 0; padding: 3px 6px; background: var(--holiday-banner-bg); color: var(--text);
-  font-weight: 700; font-size: .72rem; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin: -7px -8px 0; padding: 4px 8px; background: var(--holiday-banner-bg); color: #46536f;
+  font-weight: 600; font-size: .7rem; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.num { font-size: .85rem; font-weight: 600; }
+.num { font-size: .8rem; font-weight: 600; color: var(--text-2); font-variant-numeric: tabular-nums; }
 .today .num {
-  background: var(--accent); color: #fff; border-radius: 50%;
-  width: 24px; height: 24px; display: inline-flex;
-  align-items: center; justify-content: center;
+  background: var(--brand); color: #fff; border-radius: 50%;
+  width: 26px; height: 26px; display: inline-flex;
+  align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(23, 38, 100, .35);
 }
 /* An entry is drawn in its owner's color: --user-color is set on it from the user directory (accent blue when unknown).
    The text stays dark and only the tint and the left bar carry the color, so any user color, even a light one, stays readable. */
 .entry {
-  font-size: .75rem; background: var(--accent-soft); color: var(--text);
-  border-left: 3px solid var(--accent); border-radius: 3px;
-  padding: 2px 5px; white-space: nowrap; overflow: hidden;
+  font-size: .75rem; background: var(--brand-50); color: var(--text);
+  border-left: 3px solid var(--brand); border-radius: var(--r-sm);
+  padding: 3px 7px; white-space: nowrap; overflow: hidden;
   text-overflow: ellipsis;
 }
 .entry {
-  background: color-mix(in srgb, var(--user-color, var(--accent)) 16%, #fff);
-  border-left-color: var(--user-color, var(--accent));
-  cursor: grab;
+  background: color-mix(in srgb, var(--user-color, var(--brand)) 15%, #fff);
+  border-left-color: var(--user-color, var(--brand));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--user-color, var(--brand)) 20%, transparent);
+  cursor: grab; transition: background var(--t), box-shadow var(--t);
 }
+.entry:hover { background: color-mix(in srgb, var(--user-color, var(--brand)) 26%, #fff); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--user-color, var(--brand)) 40%, transparent), var(--shadow-xs); }
 .entry:active { cursor: grabbing; }
 .entry.actual { font-weight: 700; }
 /* Actual or forecast, without touching the owner's color: an actual keeps the solid left bar (and bold); a forecast is drawn
    "not final" - the same bar, in the owner's own color, but dashed. Same rule in the pivot. */
 .entry:not(.actual), .pivot-entry:not(.actual) { border-left-style: dashed; }
 
-/* Entry panel */
+/* ==========================================================================================================
+   Entry panel
+   ========================================================================================================== */
 .panel {
-  margin-top: 16px; background: var(--surface);
-  border: 1px solid var(--border); border-radius: 8px; padding: 16px;
+  margin-top: 18px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; box-shadow: var(--shadow-sm);
 }
-.panel h2 { margin: 0 0 12px; font-size: 1.1rem; }
-.panel ul { list-style: none; margin: 0 0 12px; padding: 0; }
+.panel h2 { margin: 0 0 14px; font-size: 1.05rem; font-weight: 650; letter-spacing: -.005em; }
+.panel ul { list-style: none; margin: 0 0 14px; padding: 0; }
 .panel li {
-  display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 6px 0;
-  border-bottom: 1px solid var(--border);
+  display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; padding: 9px 8px;
+  border-bottom: 1px solid var(--border); border-radius: var(--r-sm); transition: background var(--t);
 }
-.panel li .text { flex: 1 1 30%; min-width: 0; word-break: break-word; }
+.panel > ul > li:hover { background: var(--surface-2); }
+.panel li .text { flex: 1 1 30%; min-width: 0; word-break: break-word; font-weight: 500; }
 /* The note sits next to the project, on one line (the whole note is the row's tooltip); same width as .text so the two
    columns line up from row to row. */
 .panel li .note { flex: 1 1 30%; min-width: 0; color: var(--muted); font-size: .85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.panel li .owner { color: var(--muted); font-size: .85rem; white-space: nowrap; }
+.panel li .owner { color: var(--text-2); font-size: .85rem; white-space: nowrap; }
 .panel li .owner .user-dot { margin-left: 0; }
 /* Under an entry: who last touched it, a History toggle, and (when open) what changed - each on a row of its own */
 .panel li .meta { flex: 1 0 100%; display: flex; gap: 10px; align-items: baseline; color: var(--muted); font-size: .75rem; }
-.panel li .link-button { background: none; border: none; padding: 0; font: inherit; color: var(--accent); cursor: pointer; text-decoration: underline; }
-.panel li .link-button:hover { color: #0747a6; }
-.panel li .history { flex: 1 0 100%; margin: 0; padding: 0 0 0 12px; list-style: none; font-size: .8rem; }
-.panel li ul.history li { display: block; border: 0; padding: 1px 0; }
+.panel li .link-button { background: none; border: none; box-shadow: none; min-height: 0; padding: 0; font: inherit; font-weight: 500; color: var(--brand); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.panel li .link-button:hover { background: none; color: var(--brand-hover); }
+.panel li .history { flex: 1 0 100%; margin: 0; padding: 4px 0 2px 12px; list-style: none; font-size: .8rem; border-left: 2px solid var(--border); margin-left: 4px; }
+.panel li ul.history li { display: block; border: 0; padding: 2px 0; }
+.panel li ul.history li:hover { background: none; }
 .panel li .history time { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 6px; }
-.panel .hours { font-weight: 600; font-variant-numeric: tabular-nums; }
-.panel select {
-  font: inherit; padding: 6px 10px; background: var(--surface); color: var(--text);
-  border: 1px solid var(--border); border-radius: 6px; min-width: 0;
+.panel .hours { font-weight: 650; font-variant-numeric: tabular-nums; min-width: 2.4em; text-align: right; }
+.panel li .type { color: var(--muted); font-size: .72rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+
+/* The add/edit form, as a tinted band under the list */
+.entry-form { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+.panel select, .note-input, .field input, .data-table input[type="text"], .data-table input[type="email"], .data-table input[type="password"], .data-table select,
+.export-field select, .export-field input, .inline-field input, .data-table-head .filter {
+  font: inherit; color: var(--text); background: var(--surface); min-width: 0;
+  border: 1px solid var(--border-strong); border-radius: var(--r-md);
+  transition: border-color var(--t), box-shadow var(--t);
 }
+.panel select { padding: 0 10px; min-height: 36px; }
 .owner-select { flex: 0 1 170px; }
 .project-select { flex: 1 1 220px; }
 .hours-select { flex: 0 0 110px; }
 .type-select { flex: 0 0 120px; }
 .row { display: flex; flex-wrap: wrap; gap: 8px; }
 .note-row { margin-top: 8px; }
-.note-input {
-  flex: 1 1 auto; font: inherit; padding: 6px 10px; background: var(--surface); color: var(--text);
-  border: 1px solid var(--border); border-radius: 6px; min-width: 0;
+.note-input { flex: 1 1 auto; padding: 0 12px; min-height: 36px; }
+.panel select:focus, .note-input:focus, .field input:focus, .data-table input:focus, .data-table select:focus,
+.export-field select:focus, .export-field input:focus, .inline-field input:focus, .data-table-head .filter:focus {
+  outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px var(--ring);
 }
-.panel li .type { color: var(--muted); font-size: .8rem; white-space: nowrap; }
+.note-input::placeholder, .field input::placeholder { color: #6b728a; }
 .muted { color: var(--muted); font-size: .9rem; }
 
 @media (max-width: 640px) {
-  .cell { min-height: 70px; }
-  .entry { font-size: .65rem; }
+  .app { padding: 16px 12px 24px; }
+  .cell { min-height: 70px; padding: 5px; }
+  .entry { font-size: .65rem; padding: 2px 5px; }
+  .toolbar h2 { font-size: 1.35rem; flex-basis: 100%; }
+  .panel { padding: 14px; }
   /* Not enough room for the note beside the project: it moves to a line of its own under the row (and is skipped
      when empty), before the "last edited" line and the history. */
   .panel li .text { flex-basis: 40%; }
   .panel li .note { flex: 1 0 100%; order: 1; }
   .panel li .note:empty { display: none; }
   .panel li .meta, .panel li .history { order: 2; }
+  .appbar-inner { padding: 8px 12px; gap: 8px 10px; }
+  .brand-kicker, .user-meta .role { display: none; }
+  .brand-name { font-size: .92rem; }
 }
 
-button:disabled { opacity: .5; cursor: not-allowed; }
-button:disabled:not(.primary) { background: var(--surface); }
-button.primary:disabled { background: var(--accent); }
-
-/* Right-click menu on an entry (EntryContextMenu): a transparent layer that catches any click outside the menu, and the menu on top.
-   Above the status bar (10), below the confirm dialog (100). */
+/* ==========================================================================================================
+   Right-click menu on an entry (EntryContextMenu): a transparent layer that catches any click outside the menu,
+   and the menu on top. Above the status bar (10), below the dialogs (100).
+   ========================================================================================================== */
 .context-layer { position: fixed; inset: 0; z-index: 50; }
 .context-menu {
-  position: fixed; min-width: 150px; margin: 0; padding: 4px; list-style: none;
-  background: var(--surface); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 4px 16px rgba(9, 30, 66, .25);
+  position: fixed; min-width: 180px; margin: 0; padding: 5px; list-style: none;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow-lg);
 }
 .context-menu button {
-  display: block; width: 100%; text-align: left; padding: 6px 10px; border: none; border-radius: 4px;
-  background: none; font: inherit; color: var(--text); cursor: pointer;
+  display: flex; width: 100%; justify-content: flex-start; text-align: left; min-height: 0; padding: 8px 11px; border: none; border-radius: var(--r-sm);
+  background: none; box-shadow: none; font: inherit; color: var(--text); cursor: pointer;
 }
-.context-menu button:hover:not(:disabled), .context-menu button:focus-visible { background: var(--accent-soft); outline: none; }
-.context-menu button:disabled { color: var(--muted); cursor: not-allowed; }
+.context-menu button:hover:not(:disabled), .context-menu button:focus-visible { background: var(--brand-50); color: var(--brand-ink); outline: none; }
+.context-menu button:disabled { color: #7d889e; cursor: not-allowed; background: none; }
 
-/* Confirm dialog */
+/* ==========================================================================================================
+   Dialogs
+   ========================================================================================================== */
 .overlay {
-  position: fixed; inset: 0; background: rgba(9, 30, 66, .54);
+  position: fixed; inset: 0; background: rgba(15, 27, 51, .52); backdrop-filter: blur(2px);
   display: flex; align-items: center; justify-content: center; padding: 16px;
   z-index: 100;
 }
 .dialog {
-  background: var(--surface); border-radius: 8px; padding: 24px;
-  width: 100%; max-width: 420px; box-shadow: 0 8px 32px rgba(9, 30, 66, .35);
+  background: var(--surface); border-radius: 16px; padding: 26px;
+  width: 100%; max-width: 440px; box-shadow: var(--shadow-lg);
 }
-.dialog h2 { margin: 0 0 8px; font-size: 1.2rem; }
-.dialog p { margin: 0 0 20px; color: var(--muted); line-height: 1.4; }
+.dialog h2 { margin: 0 0 8px; font-size: 1.15rem; font-weight: 650; }
+.dialog p { margin: 0 0 22px; color: var(--text-2); line-height: 1.5; }
 .dialog .actions { display: flex; justify-content: flex-end; gap: 8px; }
 button.danger-solid { background: var(--danger); border-color: var(--danger); color: #fff; }
-button.danger-solid:hover { background: #a32a21; }
+button.danger-solid:hover { background: #a82431; border-color: #a82431; }
 
-/* Login / create account page */
-.auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
+/* ==========================================================================================================
+   Sign-in page (and the "administrators only" card)
+   ========================================================================================================== */
+.auth-page {
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 24px 16px 48px;
+  background:
+    radial-gradient(900px 520px at 12% -8%, #dbe3ff 0%, transparent 62%),
+    radial-gradient(800px 480px at 108% 108%, #e0e8ff 0%, transparent 58%),
+    var(--bg);
+}
+.auth-brand { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+.auth-brand .brand-mark { filter: drop-shadow(0 6px 14px rgba(40, 62, 170, .35)); }
+.auth-brand .brand-name { color: var(--text); font-size: 1.25rem; white-space: normal; }
+.auth-brand .brand-kicker { color: var(--muted); }
 .auth-card {
-  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
-  padding: 28px; width: 100%; max-width: 380px;
-  display: flex; flex-direction: column; gap: 14px;
-  box-shadow: 0 4px 16px rgba(9, 30, 66, .12);
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  padding: 30px 30px 28px; width: 100%; max-width: 400px;
+  display: flex; flex-direction: column; gap: 16px;
+  box-shadow: var(--shadow-md);
 }
-.auth-card h1 { margin: 0 0 4px; font-size: 1.4rem; }
-.field { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; font-weight: 600; color: var(--muted); }
-.field input {
-  font: inherit; font-weight: 400; color: var(--text); padding: 8px 10px;
-  border: 1px solid var(--border); border-radius: 6px; min-width: 0;
-}
+.auth-card h1 { margin: 0; font-size: 1.3rem; font-weight: 700; letter-spacing: -.01em; }
+.auth-card .auth-lead { margin: -8px 0 2px; color: var(--muted); font-size: .9rem; }
+.auth-card button.primary { min-height: 42px; font-size: .95rem; font-weight: 600; }
+.field { display: flex; flex-direction: column; gap: 6px; font-size: .82rem; font-weight: 600; color: var(--text-2); }
+.field input { font-weight: 400; padding: 0 12px; min-height: 42px; font-size: .95rem; }
 .auth-error { margin: 0; color: var(--danger); font-size: .9rem; }
+.auth-card .auth-error { background: var(--danger-50); border: 1px solid #f3c4c9; border-radius: var(--r-md); padding: 9px 12px; }
 .auth-note { color: var(--muted); }
 .banner { margin: 0 0 12px; }
-.banner button { margin-left: 6px; }
+.banner.auth-error { background: var(--danger-50); border: 1px solid #f3c4c9; border-radius: var(--r-md); padding: 9px 12px; }
+.banner.muted { background: var(--brand-50); border: 1px solid var(--brand-100); border-radius: var(--r-md); padding: 9px 12px; color: var(--brand-ink); }
+.banner button { margin-left: 8px; min-height: 28px; padding: 0 10px; font-size: .82rem; }
 
-/* Calendar/Pivot switch, in the toolbar next to Refresh. */
-.layout-switch { display: flex; gap: 2px; border: 1px solid var(--border); border-radius: 6px; padding: 2px; }
-.layout-switch button { border: none; background: transparent; padding: 5px 12px; border-radius: 4px; font-size: .85rem; }
-.layout-switch button:hover { background: var(--accent-soft); }
-.layout-switch button.active { background: var(--accent); color: #fff; }
-
-/* Pivot layout (MonthPivot): a read-only alternative to the day grid, dates down the left, resources across the
+/* ==========================================================================================================
+   Pivot layout (MonthPivot): a read-only alternative to the day grid, dates down the left, resources across the
    top. An entry is tinted in its owner's color the same way .entry is in the day grid, so the two layouts read
-   as the same data, just reshaped. */
-/* max-height + overflow (not just overflow-x) so the header row has something to stay pinned against as the
+   as the same data, just reshaped.
+   max-height + overflow (not just overflow-x) so the header row has something to stay pinned against as the
    body scrolls - a full month can be much taller than the screen, especially with several resource columns.
    border-collapse: separate (not collapse) is required here, not just a style choice: position: sticky on a
-   th/td silently does nothing in a border-collapse: collapse table (a real, long-standing browser limitation) -
-   confirmed by testing collapse first and watching the header scroll away instead of staying pinned. */
-.pivot-scroll { overflow: auto; max-height: 65vh; border: 1px solid var(--border); border-radius: 8px; }
+   th/td silently does nothing in a border-collapse: collapse table (a real, long-standing browser limitation).
+   ========================================================================================================== */
+.pivot-scroll { overflow: auto; max-height: 65vh; border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); background: var(--surface); }
 .pivot { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); }
-.pivot th, .pivot td { border-bottom: 1px solid var(--border); padding: 6px 10px; vertical-align: top; text-align: left; }
+.pivot th, .pivot td { border-bottom: 1px solid var(--border); padding: 7px 10px; vertical-align: top; text-align: left; }
 .pivot thead th {
-  background: #ebecf0; font-size: .8rem; font-weight: 600; color: var(--muted); white-space: nowrap;
+  background: var(--surface-2); font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); white-space: nowrap;
   position: sticky; top: 0; z-index: 1; box-shadow: inset 0 -1px 0 var(--border);
 }
 .pivot-date-head { min-width: 4em; text-align: justify; }
-.pivot-date { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; font-size: .85rem; white-space: nowrap; background: var(--surface); }
+.pivot-date { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; font-size: .85rem; color: var(--text-2); white-space: nowrap; background: var(--surface); font-variant-numeric: tabular-nums; }
 .pivot-row { cursor: pointer; }
-.pivot-row:hover td, .pivot-row:hover th.pivot-date { background: var(--accent-soft); }
+.pivot-row:hover td, .pivot-row:hover th.pivot-date { background: #f5f7ff; }
 /* Just a visual cue, same as CalendarGrid's .cell.weekend - before .today so an actual today's highlight wins. */
 .pivot-row.weekend td, .pivot-row.weekend th.pivot-date { background: var(--weekend-bg); }
 .pivot-row.today td, .pivot-row.today th.pivot-date { background: var(--today); }
 /* After .today so a holiday's grey wins, the same precedence CalendarGrid's .cell.holiday relies on. */
 .pivot-row.holiday td, .pivot-row.holiday th.pivot-date { background: var(--holiday-bg); }
-.pivot-row.selected th.pivot-date { box-shadow: inset 3px 0 0 var(--accent); }
+.pivot-row.selected th.pivot-date { box-shadow: inset 3px 0 0 var(--brand); }
 .pivot-holiday-row { cursor: pointer; }
 .pivot-holiday-banner {
-  background: var(--holiday-banner-bg); color: var(--text); font-weight: 700; font-size: .8rem;
+  background: var(--holiday-banner-bg); color: #46536f; font-weight: 600; font-size: .78rem;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .pivot td { min-width: 10em; }
 .pivot-entry {
-  font-size: .8rem; background: color-mix(in srgb, var(--user-color, var(--accent)) 16%, #fff);
-  border-left: 3px solid var(--user-color, var(--accent)); border-radius: 3px; padding: 2px 6px; margin-bottom: 3px;
+  font-size: .8rem; background: color-mix(in srgb, var(--user-color, var(--brand)) 15%, #fff);
+  border-left: 3px solid var(--user-color, var(--brand)); border-radius: var(--r-sm); padding: 3px 7px; margin-bottom: 3px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--user-color, var(--brand)) 20%, transparent);
 }
 .pivot-entry:last-child { margin-bottom: 0; }
 .pivot-entry.actual { font-weight: 700; }
