@@ -68,6 +68,9 @@ button.danger, a.button.danger { color: var(--danger); }
 .type-filter { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 0 0 12px; color: var(--muted); font-size: .85rem; }
 .type-filter label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
 .type-filter input { margin: 0 2px 0 0; cursor: pointer; }
+/* A small sample next to each box, in neutral gray (no user's color), so the row doubles as a legend for how entries look */
+.type-swatch { display: inline-block; width: 20px; height: 16px; border-radius: 2px; border-left: 4px solid var(--muted); background: color-mix(in srgb, var(--muted) 32%, #fff); }
+.type-swatch.forecast { border-left-style: dashed; }
 .user-list { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; padding: 0; list-style: none; color: var(--muted); font-size: .85rem; }
 .user-list li { display: flex; align-items: center; }
 .user-list label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
@@ -135,6 +138,9 @@ button.danger, a.button.danger { color: var(--danger); }
 }
 .entry:active { cursor: grabbing; }
 .entry.actual { font-weight: 700; }
+/* Actual or forecast, without touching the owner's color: an actual keeps the solid left bar (and bold); a forecast is drawn
+   "not final" - the same bar, in the owner's own color, but dashed. Same rule in the pivot. */
+.entry:not(.actual), .pivot-entry:not(.actual) { border-left-style: dashed; }
 
 /* Entry panel */
 .panel {
