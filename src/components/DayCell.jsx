@@ -1,8 +1,9 @@
 // monthLabel (e.g. "Aug") is only passed for days outside the displayed month.
 // userOf(username) is the entry owner's { label, color }, or undefined when the owner is not known.
+// onEntryMenu(event, entry) is called on a right click on an entry (CalendarApp opens EntryContextMenu).
 // holiday, when the date is a public holiday, is { description, countries } (see useHolidays.js): countries is
 // every country observing it that date, already comma-joined - "Description (Country, Country)" is one line.
-function DayCell({ day, monthLabel, entries, userOf, holiday, isWeekend, isOutside, isToday, isSelected, isDropTarget, onSelect, onDragStart, onDragEnd, onDragOver, onDrop }) {
+function DayCell({ day, monthLabel, entries, userOf, holiday, isWeekend, isOutside, isToday, isSelected, isDropTarget, onSelect, onDragStart, onDragEnd, onDragOver, onDrop, onEntryMenu }) {
   const cls = ["cell", isOutside && "outside", isWeekend && "weekend", isToday && "today", isSelected && "selected", isDropTarget && "drop-target", holiday && "holiday"]
     .filter(Boolean).join(" ");
 
@@ -20,6 +21,7 @@ function DayCell({ day, monthLabel, entries, userOf, holiday, isWeekend, isOutsi
         const owner = userOf(e.user);
         return (
           <div key={e.id} className={`entry${e.type === "actual" ? " actual" : ""}`} draggable onDragStart={(event) => onDragStart(event, e)} onDragEnd={onDragEnd}
+               onContextMenu={(event) => onEntryMenu(event, e)}
                style={{ "--user-color": owner && owner.color }}
                title={`${formatEntry(e)} (${owner ? owner.label : e.user}) - drag to move, Shift+drag to copy${e.note ? `\n${e.note}` : ""}`}>
             {formatEntry(e)}

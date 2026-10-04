@@ -2,7 +2,7 @@
 // entry with the dragged one's own project/hours/owner/type/note, and the dragged entry itself is left untouched.
 // Dropping an entry back onto its own cell does nothing either way (a plain move already ignored this; a Shift-copy
 // ignores it too, rather than duplicating an entry in place).
-function CalendarGrid({ year, month, entries, userOf, holidays, selected, todayKey, onSelect, onMove, onCopy }) {
+function CalendarGrid({ year, month, entries, userOf, holidays, selected, todayKey, onSelect, onMove, onCopy, onEntryMenu }) {
   const [dragged, setDragged] = React.useState(null);
   const [dropTarget, setDropTarget] = React.useState(null);
   const [moving, setMoving] = React.useState(false);
@@ -55,6 +55,7 @@ function CalendarGrid({ year, month, entries, userOf, holidays, selected, todayK
           onDragEnd={dragEnd}
           onDragOver={(event) => dragOver(event, cell.key)}
           onDrop={(event) => drop(event, cell.key)}
+          onEntryMenu={onEntryMenu}
         />
       ))}
     </div>

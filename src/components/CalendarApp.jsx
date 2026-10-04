@@ -132,10 +132,37 @@ function CalendarApp({ user, profile, users, settings, onLogout }) {
   // dragged entry (not just its id), so nothing needs to be looked up again here.
   const copy = async (entry, targetDate) => {
     setDragError("");
-    const result = await addEntry(targetDate, { project: entry.project, hours: entry.hours, user: entry.user, type: entry.type, note: entry.note });
+    const result = await addEntry(targetDate, { project: entry.project, hours: entry.hours, user: entry.user, type: entry.type, note: entry.note, isBillable: entry.isBillable });
     if (!result.ok) setDragError(`Copy failed: ${result.error}`);
     else setSelected(targetDate);
     return result;
+  };
+
+  // Right click on an entry (grid or pivot): opens EntryContextMenu where the mouse is. `menu` is { x, y, entry } or null.
+  const [menu, setMenu] = React.useState(null);
+  const openEntryMenu = (event, entry) => { event.preventDefault(); setMenu({ x: event.clientX, y: event.clientY, entry }); };
+  const closeMenu = React.useCallback(() => setMenu(null), []);
+  // Same rule as the entry form: a regular user may only create actuals while the API's restrict_user_to_actuals is on.
+  const canDuplicate = (entry) => entry.type === "actual" || isAdmin || settings.restrict_user_to_actuals === false;
+  // Duplicate: a new entry on the same day with the same project, hours, owner, note and billable flag, and the same type -
+  // or, for "Duplicate as Actual" (offered on a forecast, to everyone), `asType` = "actual". It is the Shift-drag copy
+  // (above) aimed at the entry's own day, so it appears right after the original.
+  const [duplicateNote, setDuplicateNote] = React.useState("");   // an information line (not an error) after a duplicate
+  const duplicate = async (entry, asType = entry.type) => {
+    setMenu(null);
+    setDragError("");
+    setDuplicateNote("");
+    const result = await addEntry(entry.date, { project: entry.project, hours: entry.hours, user: entry.user, type: asType, note: entry.note, isBillable: entry.isBillable });
+    if (!result.ok) {
+      setDragError(`Duplicate failed: ${result.error}`);
+      return;
+    }
+    setSelected(entry.date);
+    // Saved, but not drawn when its kind is unchecked (a copy as an actual while "Show actuals" is off): say so.
+    if (!isTypeShown(asType)) {
+      const kind = asType === "actual" ? "actuals" : "forecast";
+      setDuplicateNote(`Duplicated as ${asType === "actual" ? "an actual" : "a forecast"}, but ${kind} are not shown. Tick "Show ${kind}" to see it.`);
+    }
   };
 
   // The pivot's columns: the checked users, in the same order as their checkboxes in UserList, each with what
@@ -210,6 +237,11 @@ function CalendarApp({ user, profile, users, settings, onLogout }) {
           {dragError} <button onClick={() => setDragError("")}>Dismiss</button>
         </p>
       )}
+      {duplicateNote && (
+        <p className="muted banner" role="status">
+          {duplicateNote} <button onClick={() => setDuplicateNote("")}>Dismiss</button>
+        </p>
+      )}
       {layout === "pivot" ? (
         <MonthPivot
           year={year}
@@ -220,6 +252,7 @@ function CalendarApp({ user, profile, users, settings, onLogout }) {
           selected={selected}
           todayKey={todayKey}
           onSelect={setSelected}
+          onEntryMenu={openEntryMenu}
         />
       ) : (
         <CalendarGrid
@@ -233,6 +266,7 @@ function CalendarApp({ user, profile, users, settings, onLogout }) {
           onSelect={setSelected}
           onMove={move}
           onCopy={copy}
+          onEntryMenu={openEntryMenu}
         />
       )}
       <EntryPanel
@@ -249,6 +283,17 @@ function CalendarApp({ user, profile, users, settings, onLogout }) {
         onUpdate={updateEntry}
         onRemove={removeEntry}
       />
+      {menu && (
+        <EntryContextMenu
+          x={menu.x}
+          y={menu.y}
+          canDuplicate={canDuplicate(menu.entry)}
+          hint="Only an administrator can create forecast entries"
+          onDuplicate={() => duplicate(menu.entry)}
+          onDuplicateAsActual={menu.entry.type === "forecast" ? () => duplicate(menu.entry, "actual") : undefined}
+          onClose={closeMenu}
+        />
+      )}
       {confirmingClear && (
         <ConfirmDialog
           title="Clear all data?"

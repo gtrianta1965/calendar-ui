@@ -25,6 +25,7 @@ const toUiEntry = (e) => ({
   date: e.entry_date,
   type: e.entry_type,
   note: e.note || "",
+  isBillable: e.is_billable,     // true/false: carried so a copy of an entry keeps it
   createdBy: e.created_by,       // usernames, null for an entry older than the audit columns
   modifiedBy: e.modified_by,     // null until the entry is first changed
   createdAt: e.created_at,
@@ -100,10 +101,11 @@ function useEntries({ from, to, userIds, projectIdOf, userIdOf }) {
 
   // `user` is whose entry it is; left out, it is the signed-in user (the API's default). `note`, trimmed, is left
   // out entirely when blank (the API's own default, no note, rather than sending an empty string it would refuse).
-  const addEntry = (date, { project, hours, user: owner, type, note }) => attempt(async () => {
+  const addEntry = (date, { project, hours, user: owner, type, note, isBillable }) => attempt(async () => {
     const body = { project_id: projectId(project), entry_date: date, hours, entry_type: type };
     if (owner) body.user_id = ownerId(owner);
     if (note && note.trim()) body.note = note.trim();
+    if (typeof isBillable === "boolean") body.is_billable = isBillable;   // left out: the API's default (billable)
     const created = toUiEntry(await apiCreateEntry(body));
     setState((s) => ({ ...s, entries: withEntry(s.entries, created.id, created) }));
   });

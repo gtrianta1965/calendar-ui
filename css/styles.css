@@ -199,6 +199,20 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 button:disabled:not(.primary) { background: var(--surface); }
 button.primary:disabled { background: var(--accent); }
 
+/* Right-click menu on an entry (EntryContextMenu): a transparent layer that catches any click outside the menu, and the menu on top.
+   Above the status bar (10), below the confirm dialog (100). */
+.context-layer { position: fixed; inset: 0; z-index: 50; }
+.context-menu {
+  position: fixed; min-width: 150px; margin: 0; padding: 4px; list-style: none;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 4px 16px rgba(9, 30, 66, .25);
+}
+.context-menu button {
+  display: block; width: 100%; text-align: left; padding: 6px 10px; border: none; border-radius: 4px;
+  background: none; font: inherit; color: var(--text); cursor: pointer;
+}
+.context-menu button:hover:not(:disabled), .context-menu button:focus-visible { background: var(--accent-soft); outline: none; }
+.context-menu button:disabled { color: var(--muted); cursor: not-allowed; }
+
 /* Confirm dialog */
 .overlay {
   position: fixed; inset: 0; background: rgba(9, 30, 66, .54);
