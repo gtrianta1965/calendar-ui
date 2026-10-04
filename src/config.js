@@ -14,7 +14,7 @@ const API_BASE_URL = "https://sbef1gj6zmj6uhq-dbg30.adb.eu-frankfurt-1.oracleclo
 
 // The version of this front end, shown at the bottom of every page (the calendar and the admin console) so you can tell
 // which build is running. Bump it by hand with each change.
-const UI_VERSION = "3.0.1";
+const UI_VERSION = "3.0.2";
 
 // NOT USED BY THE APP ANY MORE: it signs in, and lists users, through the API. These are only the usernames
 // db/create_db.py creates in a NEW database. There are no passwords here (this file is served to the browser as
