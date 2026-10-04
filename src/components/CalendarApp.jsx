@@ -275,6 +275,9 @@ function CalendarApp({ user, profile, users, settings, onLogout }) {
         currentUser={user}
         isAdmin={isAdmin}
         restrictUserToActuals={settings.restrict_user_to_actuals !== false}
+        defaultHours={settings.default_hours ?? DEFAULT_HOURS}
+        hourChoices={settings.hour_options ?? HOUR_OPTIONS}
+        maxNoteLength={settings.max_note_length ?? 1000}
         userOf={userOf}
         isShown={isShown}
         isTypeShown={isTypeShown}

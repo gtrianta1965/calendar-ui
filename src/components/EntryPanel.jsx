@@ -27,12 +27,13 @@ const IconDelete = () => (
 
 // owners: the users an entry can be given to, [{ username, label, color }] (never an administrator); currentUser: the signed-in username;
 // userOf(username): an entry owner's { id, label, color }; isShown(username): whether that user's entries are checked;
-// isTypeShown(type): whether "forecast" / "actual" entries are checked (EntryTypeFilter).
+// isTypeShown(type): whether "forecast" / "actual" entries are checked (EntryTypeFilter);
+// defaultHours, hourChoices and maxNoteLength come from GET /settings (the API's own values), falling back to config.js.
 // onAdd, onUpdate and onRemove call the API and resolve with { ok: true } or { ok: false, error }.
-function EntryPanel({ dateKey: selectedKey, owners, currentUser, isAdmin, restrictUserToActuals, userOf, isShown, isTypeShown, entries, onAdd, onUpdate, onRemove }) {
+function EntryPanel({ dateKey: selectedKey, owners, currentUser, isAdmin, restrictUserToActuals, userOf, isShown, isTypeShown, defaultHours = DEFAULT_HOURS, hourChoices = HOUR_OPTIONS, maxNoteLength = 1000, entries, onAdd, onUpdate, onRemove }) {
   // Select values are strings. project "" means nothing chosen yet; hours starts at the default.
   const [project, setProject] = React.useState("");
-  const [hours, setHours] = React.useState(String(DEFAULT_HOURS));
+  const [hours, setHours] = React.useState(String(defaultHours));
   const canAddForecast = isAdmin || !restrictUserToActuals;
   const [type, setType] = React.useState(canAddForecast ? "forecast" : "actual");
   const [note, setNote] = React.useState("");             // one line, optional
@@ -54,7 +55,7 @@ function EntryPanel({ dateKey: selectedKey, owners, currentUser, isAdmin, restri
   const catalog = useProjects(ownerId);
 
   const resetEditor = () => {
-    setProject(""); setHours(String(DEFAULT_HOURS)); setType(canAddForecast ? "forecast" : "actual"); setNote("");
+    setProject(""); setHours(String(defaultHours)); setType(canAddForecast ? "forecast" : "actual"); setNote("");
     setOwner(defaultOwner); setEditingId(null); setFailure(""); setHiddenNote("");
   };
 
@@ -133,8 +134,8 @@ function EntryPanel({ dateKey: selectedKey, owners, currentUser, isAdmin, restri
     : e.createdBy ? `Added by ${nameOf(e.createdBy)} · ${formatWhen(e.createdAt)}` : "";
   const placeholder = catalog.status === "loading" ? "Loading projects…"
     : catalog.status === "error" ? "Projects unavailable" : "Customer - Project…";
-  const hourOptions = HOUR_OPTIONS.includes(Number(hours))
-    ? HOUR_OPTIONS : [...HOUR_OPTIONS, Number(hours)];
+  const hourOptions = hourChoices.includes(Number(hours))
+    ? hourChoices : [...hourChoices, Number(hours)];
 
   return (
     <div className="panel">
@@ -235,7 +236,7 @@ function EntryPanel({ dateKey: selectedKey, owners, currentUser, isAdmin, restri
             aria-label="Note"
             placeholder="Note (optional)"
             value={note}
-            maxLength={1000}
+            maxLength={maxNoteLength}
             onChange={(e) => setNote(e.target.value)}
           />
         </div>
