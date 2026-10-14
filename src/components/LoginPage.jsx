@@ -56,6 +56,20 @@ function LoginPage({ onLogin, notice }) {
           {busy ? "Signing in…" : "Sign in"}
         </button>
       </form>
+
+      <div className="auth-try">
+        <span className="auth-try-badge">New</span>
+        <p>
+          We have a new calendar built with Oracle APEX.{" "}
+          <a
+            href="https://sbef1gj6zmj6uhq-dbg30.adb.eu-frankfurt-1.oraclecloudapps.com/ords/r/gtrianta/calendar"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Try it out &rarr;
+          </a>
+        </p>
+      </div>
     </div>
   );
 }

@@ -377,6 +377,18 @@ button.danger-solid:hover { background: #a82431; border-color: #a82431; }
 .auth-error { margin: 0; color: var(--danger); font-size: .9rem; }
 .auth-card .auth-error { background: var(--danger-50); border: 1px solid #f3c4c9; border-radius: var(--r-md); padding: 9px 12px; }
 .auth-note { color: var(--muted); }
+.auth-try {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; max-width: 400px;
+  background: var(--brand-50); border: 1px solid var(--brand-100); border-radius: var(--r-md);
+  padding: 12px 14px;
+}
+.auth-try p { margin: 0; font-size: .9rem; color: var(--brand-ink); }
+.auth-try a { font-weight: 600; white-space: nowrap; }
+.auth-try-badge {
+  flex: none; font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  color: #fff; background: var(--brand); border-radius: 999px; padding: 3px 8px;
+}
 .banner { margin: 0 0 12px; }
 .banner.auth-error { background: var(--danger-50); border: 1px solid #f3c4c9; border-radius: var(--r-md); padding: 9px 12px; }
 .banner.muted { background: var(--brand-50); border: 1px solid var(--brand-100); border-radius: var(--r-md); padding: 9px 12px; color: var(--brand-ink); }
